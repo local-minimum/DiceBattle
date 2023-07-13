@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 5873130719400297420}
   - component: {fileID: 1389215867929101374}
   - component: {fileID: 2656888507874759259}
+  - component: {fileID: 8305253981924251548}
   m_Layer: 5
   m_Name: DIeButton
   m_TagString: Untagged
@@ -378,3 +379,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DieText: {fileID: 4749157678803794537}
   button: {fileID: 5873130719400297420}
+  dragFuzzTime: 0.3
+--- !u!114 &8305253981924251548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5873130719400297422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7d98c2b954b6eb448d01d8b9f77b34a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
