@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public delegate void DropDieEvent(Die die);
+
 public class Die : MonoBehaviour
 {
+    public static event DropDieEvent OnDropDie;
+
+    public static Die DraggedDie { get; private set; }
+
     DiceManager diceManager;
 
     [SerializeField]
@@ -12,6 +18,9 @@ public class Die : MonoBehaviour
 
     [SerializeField]
     Button button;
+
+    [SerializeField]
+    Image buttonImage;
 
     private bool interactable;
     public bool Interactable { 
@@ -42,7 +51,7 @@ public class Die : MonoBehaviour
     {
         if (!button.interactable) return;
 
-        if (diceManager.phase == DiceManagerPhases.PreRoll)
+        if (diceManager.Phase == DiceManagerPhases.PreRoll)
         {
             BeforeRollHovered = true;
             diceManager.StartHoverDie(this);
@@ -80,17 +89,24 @@ public class Die : MonoBehaviour
     int _postDragRestoreIndex = 0;
     RectTransform RestoreParentTransform { get; set; }
 
-    bool _dragging = false;
     float _stopDragTime = 0;
     bool Dragging
     {
-        get => _dragging || Time.timeSinceLevelLoad < _stopDragTime;
+        get => DraggedDie == this || Time.timeSinceLevelLoad < _stopDragTime;
 
         set
         {
-            _dragging = value;
-            if (!value)
+            if (value)
             {
+                DraggedDie = this;
+                buttonImage.raycastTarget = false;
+            }
+            else {
+                if (DraggedDie == this)
+                {
+                    DraggedDie = null;
+                }
+                buttonImage.raycastTarget = true;
                 _stopDragTime = Time.timeSinceLevelLoad + dragFuzzTime;
             }
         }
@@ -98,7 +114,7 @@ public class Die : MonoBehaviour
 
     public void OnDragStart()
     {
-        if (diceManager.phase != DiceManagerPhases.Rolled) return;
+        if (diceManager.Phase != DiceManagerPhases.Rolled) return;
 
         if (RestoreParentTransform == null)
         {
@@ -116,6 +132,7 @@ public class Die : MonoBehaviour
         transform.SetParent(RestoreParentTransform);
         transform.SetSiblingIndex(_postDragRestoreIndex);
         Dragging = false;
+        OnDropDie?.Invoke(this);
     }
 
     public void OnDrag()
@@ -130,7 +147,7 @@ public class Die : MonoBehaviour
     {
         if (Dragging || !Interactable) return;
 
-        switch (diceManager.phase)
+        switch (diceManager.Phase)
         {
             case DiceManagerPhases.PreRoll:
                 Roll();
@@ -142,25 +159,39 @@ public class Die : MonoBehaviour
         }
     }
 
+    public int Value { get; private set; }
     public void Roll()
     {
-        DieText.text = Random.Range(1, 7).ToString();
+        Value = Random.Range(1, 7);
+        DieText.text = Value.ToString();
         Rolled = true;
+        transform.SetAsFirstSibling();
     }
 
     public void Clear()
     {
         Rolled = false;
         BeforeRollHovered = false;
+        transform.SetAsLastSibling();
     }
 
     public void NoDice()
     {
+        Clear();
         Interactable = false;
     }
 
     public void HasDie()
     {
+        transform.SetAsFirstSibling();
         Interactable = true;
+    }
+
+    private void OnDestroy()
+    {
+        if (DraggedDie == this)
+        {
+            DraggedDie = null;
+        }
     }
 }
