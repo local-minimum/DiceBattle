@@ -64,18 +64,23 @@ public class DieDropZone : MonoBehaviour
     {
         Value = spawnValue;
         TextUI.color = ValueDefaultColor;
-        Die.OnDropDie += Die_OnDropDie;
-        DiceManager.OnPhaseChange += DiceManager_OnPhaseChange;
-    }
 
+        Die.OnDropDie += Die_OnDropDie;
+        Battle.OnChangePhase += Battle_OnChangePhase;
+    }
 
     private void OnDisable()
     {
         Die.OnDropDie -= Die_OnDropDie;
-        DiceManager.OnPhaseChange -= DiceManager_OnPhaseChange;
+        Battle.OnChangePhase -= Battle_OnChangePhase;
     }
 
-    private void DiceManager_OnPhaseChange(DiceManagerPhases phase)
+    private void Battle_OnChangePhase(BattlePhase phase)
+    {
+        if (phase == BattlePhase.Cleanup) CleanUpPhase();
+    }
+
+    void CleanUpPhase()
     {
         if (holdsDie && Value > 1) { Value--; }
     }

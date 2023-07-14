@@ -51,7 +51,7 @@ public class Die : MonoBehaviour
     {
         if (!button.interactable) return;
 
-        if (diceManager.Phase == DiceManagerPhases.PreRoll)
+        if (Battle.Phase == BattlePhase.SelectNumberOfDice)
         {
             BeforeRollHovered = true;
             diceManager.StartHoverDie(this);
@@ -61,11 +61,6 @@ public class Die : MonoBehaviour
     public void OnHoverEnd()
     {
         if (!Interactable) return;
-
-        /*
-        BeforeRollHovered = false;
-        diceManager.EndHoverDie(this);
-        */
     }
 
 
@@ -114,7 +109,7 @@ public class Die : MonoBehaviour
 
     public void OnDragStart()
     {
-        if (diceManager.Phase != DiceManagerPhases.Rolled) return;
+        if (Battle.Phase != BattlePhase.UseDice) return;
 
         if (RestoreParentTransform == null)
         {
@@ -133,6 +128,11 @@ public class Die : MonoBehaviour
         transform.SetSiblingIndex(_postDragRestoreIndex);
         Dragging = false;
         OnDropDie?.Invoke(this);
+
+        if (!diceManager.HasDiceRemaining())
+        {
+            Battle.Phase = Battle.Phase.NextPhase();
+        }
     }
 
     public void OnDrag()
@@ -147,14 +147,10 @@ public class Die : MonoBehaviour
     {
         if (Dragging || !Interactable) return;
 
-        switch (diceManager.Phase)
+        switch (Battle.Phase)
         {
-            case DiceManagerPhases.PreRoll:
-                Roll();
-                diceManager.RollDie(this);
-                break;
-            case DiceManagerPhases.Rolled:
-                diceManager.ResetDice();
+            case BattlePhase.SelectNumberOfDice:
+                diceManager.SelectDieToRoll(this);
                 break;
         }
     }

@@ -3,70 +3,89 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum DiceManagerPhases { PreRoll, Rolled };
-
-public delegate void DicePhaseEvent(DiceManagerPhases phase);
-
 public class DiceManager : MonoBehaviour
 {
-    public static event DicePhaseEvent OnPhaseChange;
-
-    private DiceManagerPhases _phase;
-
-    public DiceManagerPhases Phase
-    {
-        get => _phase;
-        set
-        {
-            _phase = value;
-            OnPhaseChange?.Invoke(value);
-        }
-    }
-
     [SerializeField]
     TMPro.TextMeshProUGUI diceBag;
 
     [SerializeField]
-    TMPro.TextMeshProUGUI trashBag;
+    DieTrashZone diceTrash;
 
     [SerializeField]
     Die[] dice;
 
     public int diceCount = 20;
-    public int discardedDice = 0;
 
     public int maxHandSize = 4;
 
     private void OnEnable()
     {
+        diceBag.text = diceCount.ToString();
+
         DieDropZone.OnRecycleDie += DieDropZone_OnRecycleDie;
-        ResetDice();
+        Battle.OnChangePhase += Battle_OnChangePhase;
     }
+
 
     private void OnDisable()
     {
+        Battle.OnChangePhase -= Battle_OnChangePhase;
         DieDropZone.OnRecycleDie -= DieDropZone_OnRecycleDie;
     }
 
+    private void Battle_OnChangePhase(BattlePhase phase)
+    {
+        switch (phase)
+        {
+            case BattlePhase.SelectNumberOfDice:
+                PrepareDiceCountSelection();
+                break;
+            case BattlePhase.RollDice:
+                RollSelectedDice();
+                break;
+            case BattlePhase.Cleanup:
+                ResetDice();
+                break;
+        }
+    }
+
+    Die rollToDie;
+
+    private void RollSelectedDice()
+    {
+        bool encountered = false;
+        for (int i = 0; i<dice.Length; i++)
+        {
+            if (!encountered)
+            {
+                dice[i].Roll();
+                diceCount--;
+
+                encountered = rollToDie == dice[i];
+            } else
+            {
+                dice[i].NoDice();
+            }
+        }
+
+        diceBag.text = diceCount.ToString();
+    }
     private void DieDropZone_OnRecycleDie(int value)
     {
-        discardedDice++;
-        trashBag.text = discardedDice.ToString();
+        diceTrash.Trashed++;
     }
 
     public void ResetDice()
     {
         for (int i = 0; i<dice.Length; i++)
         {
-            if (dice[i].Rolled)
-            {
-                discardedDice++;
-                diceCount--;
-            }
-
             dice[i].Clear();
+            dice[i].NoDice();
         }
+    }
 
+    public void PrepareDiceCountSelection()
+    {
         for (int i = 0; i < dice.Length; i++)
         {
             if (i < Mathf.Min(diceCount, maxHandSize))
@@ -83,16 +102,11 @@ public class DiceManager : MonoBehaviour
         {
             dice[i].transform.SetSiblingIndex(i);
         }
-
-        diceBag.text = diceCount.ToString();
-        trashBag.text = discardedDice.ToString();
-
-        Phase = DiceManagerPhases.PreRoll;
     }
 
     public void StartHoverDie(Die die)
     {
-        if (Phase != DiceManagerPhases.PreRoll) return;
+        if (Battle.Phase != BattlePhase.SelectNumberOfDice) return;
 
         bool encountered = false;
         for (int i = 0; i<dice.Length; i++)
@@ -110,7 +124,7 @@ public class DiceManager : MonoBehaviour
 
     public void EndHoverDie(Die die)
     {
-        if (Phase != DiceManagerPhases.PreRoll) return;
+        if (Battle.Phase != BattlePhase.SelectNumberOfDice) return;
 
         for (int i = 0; i<dice.Length; i++)
         {
@@ -121,25 +135,23 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    public void RollDie(Die die)
+    public void SelectDieToRoll(Die die)
     {
-        if (Phase != DiceManagerPhases.PreRoll) return;
+        if (Battle.Phase != BattlePhase.SelectNumberOfDice) return;
 
-        Phase = DiceManagerPhases.Rolled;
-        bool encountered = false;
+        rollToDie = die;
+        Battle.Phase = BattlePhase.RollDice;
+    }
+
+    public bool HasDiceRemaining()
+    {
         for (int i = 0; i<dice.Length; i++)
         {
-            if (die == dice[i])
+            if (dice[i].Rolled)
             {
-                encountered = true;
-            }
-            else if (!encountered)
-            {
-                dice[i].Roll();
-            } else
-            {
-                dice[i].NoDice();
+                return true;
             }
         }
+        return false;
     }
 }
