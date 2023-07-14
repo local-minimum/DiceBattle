@@ -1,16 +1,76 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.EventSystems;
 using UnityEngine;
+
+public delegate void TooltipEvent(TooltipedItem tooltip, bool show);
 
 public class TooltipedItem : MonoBehaviour
 {
-    private void OnMouseEnter()
+    [SerializeField]
+    string tooltip;
+    public string Tooltip => tooltip;
+
+    public static event TooltipEvent OnTooltip;
+
+    EventTrigger _eventTrigger;
+    EventTrigger EventTrigger
     {
-        Debug.Log("hello");
+        get
+        {
+            if (_eventTrigger == null)
+            {
+                _eventTrigger = GetComponentInChildren<EventTrigger>(true);
+
+                if (_eventTrigger == null)
+                {
+                    _eventTrigger = gameObject.AddComponent<EventTrigger>();
+                }
+            }
+            return _eventTrigger;
+        }
     }
 
-    private void OnMouseExit()
+    EventTrigger.Entry pointerEnterEntry;
+    EventTrigger.Entry pointerExitEntry;
+
+    private void OnEnable()
     {
-        Debug.Log("Bye");
+        var trigger = EventTrigger;
+
+        if (pointerEnterEntry == null)
+        {
+            pointerEnterEntry = new EventTrigger.Entry();
+            pointerEnterEntry.eventID = EventTriggerType.PointerEnter;
+            pointerEnterEntry.callback.AddListener(delegate { ShowTooltip(); });
+        }
+
+        if (pointerExitEntry == null)
+        {
+            pointerExitEntry = new EventTrigger.Entry();
+            pointerExitEntry.eventID = EventTriggerType.PointerExit;
+            pointerExitEntry.callback.AddListener(delegate { HideTooltip(); });
+        }
+
+        trigger.triggers.Add(pointerEnterEntry);
+        trigger.triggers.Add(pointerExitEntry);
+    }
+
+    private void OnDisable()
+    {
+        var trigger = EventTrigger;
+        trigger.triggers.Remove(pointerEnterEntry);
+        trigger.triggers.Remove(pointerExitEntry);
+    }
+
+
+    void ShowTooltip()
+    {
+        OnTooltip?.Invoke(this, true);
+    }
+
+    void HideTooltip()
+    {
+        OnTooltip?.Invoke(this, false);
     }
 }
