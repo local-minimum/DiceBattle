@@ -8,6 +8,12 @@ public class ActionCard : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI SlottedDiceUI;
 
+    [SerializeField]
+    TMPro.TextMeshProUGUI ActionCostUI;
+
+    [SerializeField, Range(0, 3)]
+    int actionPointCost = 1;
+
     List<DieDropZone> dropZones = new List<DieDropZone>();
 
     private void Awake()
@@ -18,6 +24,7 @@ public class ActionCard : MonoBehaviour
 
     private void OnEnable()
     {
+        SyncActionPointCost();
         DieDropZone.OnChange += DieDropZone_OnChange;
     }
 
@@ -37,5 +44,10 @@ public class ActionCard : MonoBehaviour
     {
         var slotted = dropZones.Where(dz => dz.HoldsDie).Count();
         SlottedDiceUI.text = $"{slotted} / {dropZones.Count}";
+    }
+
+    void SyncActionPointCost()
+    {
+        ActionCostUI.text = new string('X', actionPointCost);
     }
 }
