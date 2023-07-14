@@ -9,7 +9,6 @@ public enum BattlePhase
     SelectNumberOfDice,
     RollDice,
     UseDice,
-    SelectActions,
     PlayerAttack,
     MonsterAttack,
     Cleanup,
@@ -42,8 +41,6 @@ public static class Battle
             case BattlePhase.RollDice:
                 return BattlePhase.UseDice;
             case BattlePhase.UseDice:
-                return BattlePhase.SelectActions;
-            case BattlePhase.SelectActions:
                 return BattlePhase.PlayerAttack;
             case BattlePhase.PlayerAttack:
                 return BattlePhase.MonsterAttack;

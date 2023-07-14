@@ -39,7 +39,9 @@ public class Die : MonoBehaviour
         diceManager = GetComponentInParent<DiceManager>();
     }
 
-    public bool BeforeRollHovered
+    bool hovering = false;
+
+    public bool RollCandidate
     {
         set
         {
@@ -51,16 +53,23 @@ public class Die : MonoBehaviour
     {
         if (!button.interactable) return;
 
+        hovering = this;
+
         if (Battle.Phase == BattlePhase.SelectNumberOfDice)
         {
-            BeforeRollHovered = true;
-            diceManager.StartHoverDie(this);
+            diceManager.SetRollCandidates(this);
         }
     }
 
     public void OnHoverEnd()
     {
         if (!Interactable) return;
+
+        if (hovering && Battle.Phase == BattlePhase.SelectNumberOfDice)
+        {
+            diceManager.SetRollCandidates(null);
+            hovering = false;
+        }
     }
 
 
@@ -167,7 +176,7 @@ public class Die : MonoBehaviour
     public void Clear()
     {
         Rolled = false;
-        BeforeRollHovered = false;
+        RollCandidate = false;
         transform.SetAsLastSibling();
     }
 

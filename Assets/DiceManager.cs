@@ -91,6 +91,11 @@ public class DiceManager : MonoBehaviour
     {
         for (int i = 0; i<dice.Length; i++)
         {
+            if (dice[i].Rolled)
+            {
+                diceTrash.Trashed++;
+            }
+
             dice[i].Clear();
             dice[i].NoDice();
         }
@@ -118,20 +123,24 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    public void StartHoverDie(Die die)
+    public void SetRollCandidates(Die untilDie)
     {
         if (Battle.Phase != BattlePhase.SelectNumberOfDice) return;
 
         bool encountered = false;
         for (int i = 0; i<dice.Length; i++)
         {
-            if (die == dice[i])
+            if (!encountered && untilDie != null)
             {
-                encountered = true;
-            }
-            else
+                dice[i].RollCandidate = !encountered;
+
+                if (untilDie == dice[i])
+                {
+                    encountered = true;
+                }
+            } else
             {
-                dice[i].BeforeRollHovered = !encountered;
+                dice[i].RollCandidate = false;
             }
         }
     }
@@ -144,7 +153,7 @@ public class DiceManager : MonoBehaviour
         {
             if (die != dice[i])
             {
-                dice[i].BeforeRollHovered = false;
+                dice[i].RollCandidate = false;
             }
         }
     }

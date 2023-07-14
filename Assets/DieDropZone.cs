@@ -4,10 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public delegate void RecycledDieEvent(int value);
+public delegate void DieDropZoneChangeEvent(DieDropZone dropZone);
 
 public class DieDropZone : MonoBehaviour
 {
     public static event RecycledDieEvent OnRecycleDie;
+    public static event DieDropZoneChangeEvent OnChange;
 
     [SerializeField]
     Color HoverColor;
@@ -34,6 +36,7 @@ public class DieDropZone : MonoBehaviour
     TMPro.TextMeshProUGUI TextUI;
 
     bool holdsDie = false;
+    public bool HoldsDie => holdsDie;
 
     bool hovered = false;
     public void OnHoverStart()
@@ -62,11 +65,14 @@ public class DieDropZone : MonoBehaviour
 
     private void OnEnable()
     {
+        holdsDie = false;
         Value = spawnValue;
         TextUI.color = ValueDefaultColor;
 
         Die.OnDropDie += Die_OnDropDie;
         Battle.OnChangePhase += Battle_OnChangePhase;
+
+        OnChange?.Invoke(this);
     }
 
     private void OnDisable()
@@ -82,7 +88,10 @@ public class DieDropZone : MonoBehaviour
 
     void CleanUpPhase()
     {
-        if (holdsDie && Value > 1) { Value--; }
+        if (holdsDie && Value > 1) { 
+            Value--; 
+            OnChange?.Invoke(this);
+        }
     }
 
     private void Die_OnDropDie(Die die)
@@ -98,6 +107,8 @@ public class DieDropZone : MonoBehaviour
         TextUI.color = ValueDieColor;
         die.NoDice();
         holdsDie = true;
+
+        OnChange?.Invoke(this);
     }
 
     int _value;
