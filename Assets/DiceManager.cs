@@ -39,9 +39,19 @@ public class DiceManager : MonoBehaviour
         {
             case BattlePhase.SelectNumberOfDice:
                 PrepareDiceCountSelection();
+                if (diceCount == 0)
+                {
+                    Battle.Phase = Battle.Phase.NextPhase();
+                }
                 break;
             case BattlePhase.RollDice:
                 RollSelectedDice();
+                break;
+            case BattlePhase.UseDice:
+                if (!HasDiceRemaining())
+                {
+                    Battle.Phase = Battle.Phase.NextPhase();
+                }
                 break;
             case BattlePhase.Cleanup:
                 ResetDice();
@@ -53,6 +63,8 @@ public class DiceManager : MonoBehaviour
 
     private void RollSelectedDice()
     {
+        if (rollToDie == null) return;
+
         bool encountered = false;
         for (int i = 0; i<dice.Length; i++)
         {
@@ -82,6 +94,8 @@ public class DiceManager : MonoBehaviour
             dice[i].Clear();
             dice[i].NoDice();
         }
+
+        rollToDie = null;
     }
 
     public void PrepareDiceCountSelection()
