@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public delegate void RecycledDieEvent(int value);
 public delegate void DieDropZoneChangeEvent(DieDropZone dropZone);
 
+public enum DieEffect { Add, Subtract };
+
 public class DieDropZone : MonoBehaviour
 {
     public static event RecycledDieEvent OnRecycleDie;
@@ -31,6 +33,10 @@ public class DieDropZone : MonoBehaviour
 
     [SerializeField]
     int spawnValue = 0;
+
+    [SerializeField]
+    DieEffect dieEffect = DieEffect.Add;
+    public DieEffect DieEffect => dieEffect;
 
     [SerializeField]
     TMPro.TextMeshProUGUI TextUI;
@@ -63,14 +69,18 @@ public class DieDropZone : MonoBehaviour
         transform.localScale = Vector3.one * padding;
     }
 
-    private void OnEnable()
+    public void Clear()
     {
         holdsDie = false;
-        Value = spawnValue;
+        DiceValue = spawnValue;
         TextUI.color = ValueDefaultColor;
 
+        OnChange?.Invoke(this);
+    }
+
+    private void OnEnable()
+    {
         Die.OnDropDie += Die_OnDropDie;
-        Battle.OnChangePhase += Battle_OnChangePhase;
 
         OnChange?.Invoke(this);
     }
@@ -78,18 +88,13 @@ public class DieDropZone : MonoBehaviour
     private void OnDisable()
     {
         Die.OnDropDie -= Die_OnDropDie;
-        Battle.OnChangePhase -= Battle_OnChangePhase;
     }
 
-    private void Battle_OnChangePhase(BattlePhase phase)
-    {
-        if (phase == BattlePhase.Cleanup) CleanUpPhase();
-    }
 
-    void CleanUpPhase()
+    public void CleanUp()
     {
-        if (holdsDie && Value > 1) { 
-            Value--; 
+        if (holdsDie && DiceValue > 1) { 
+            DiceValue--; 
             OnChange?.Invoke(this);
         }
     }
@@ -103,7 +108,7 @@ public class DieDropZone : MonoBehaviour
             OnRecycleDie?.Invoke(Value);
         }
 
-        Value = die.Value;
+        DiceValue = die.Value;
         TextUI.color = ValueDieColor;
         die.NoDice();
         holdsDie = true;
@@ -112,12 +117,27 @@ public class DieDropZone : MonoBehaviour
     }
 
     int _value;
-    public int Value { 
-        get => _value; 
-        private set
-        {
-            _value = value;
-            TextUI.text = value.ToString();
+    public int Value {
+        get {
+            switch (DieEffect) {
+                case DieEffect.Add:
+                    return _value;
+                case DieEffect.Subtract:
+                    return -_value;
+                default:
+                    return 0;
+            }
         }
     }
+
+    public int DiceValue
+    {
+        get => _value;
+        set
+        {
+            _value = Mathf.Abs(value);
+            TextUI.text = _value.ToString();
+        }
+    }
+       
 }
