@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BattleLog : MonoBehaviour
@@ -23,9 +24,29 @@ public class BattleLog : MonoBehaviour
         ActionCard.OnAction -= ActionCard_OnAction;
     }
 
-    private void ActionCard_OnAction(ActionCard card)
+    private void ActionCard_OnAction(ActionCard card, Monster receiver)
     {
-        History.Enqueue($"Player does a {card.Value} attack with {card.ItemName}");
+        if (receiver == null)
+        {
+            History.Enqueue($"Player applies {card.ItemName} with value {card.Value}");
+        } else
+        {
+            var attack = card.Value - receiver.Defence;
+            if (attack <= 0)
+            {
+                History.Enqueue($"Player attacks {receiver.Name} with {card.ItemName} but fails to damage them");
+            } else
+            {
+                receiver.Health -= attack;
+                History.Enqueue($"Player attacks {receiver.Name} with {card.ItemName} causing {attack} damage");
+
+                if (receiver.Health == 0)
+                {
+                    History.Enqueue($"{receiver.Name} dies");
+                    History.Enqueue($"Player gains {receiver.XpReward} XP");
+                }
+            }
+        }
         Publish();
     }
 
@@ -42,6 +63,6 @@ public class BattleLog : MonoBehaviour
     void Publish()
     {
         TruncateHistory();
-        TextUI.text = string.Join("\n", History);
+        TextUI.text = string.Join("\n", History.Reverse());
     }
 }

@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public delegate void ActionCardEvent(ActionCard card);
+public delegate void ActionCardEvent(ActionCard card, Monster reciever);
+
+public enum ActionType { Attack, Defence, Passive }
 
 public class ActionCard : MonoBehaviour
 {
     public static event ActionCardEvent OnAction;
+
+    public static ActionCard DraggedCard { get; private set; }
+
+    [SerializeField]
+    ActionType actionType = ActionType.Attack;
+    public ActionType Action => actionType;
 
     [SerializeField]
     TMPro.TextMeshProUGUI SlottedDiceUI;
@@ -21,8 +29,9 @@ public class ActionCard : MonoBehaviour
     [SerializeField]
     GameObject HoverEffect;
 
-    [SerializeField, Range(0, 3)]
+    [SerializeField, Range(0, 4)]
     int actionPointCost = 1;
+    public int ActionPoints => actionPointCost;
 
     List<DieDropZone> dropZones = new List<DieDropZone>();
 
@@ -33,7 +42,7 @@ public class ActionCard : MonoBehaviour
     GameObject FaceDown;
 
     public string ItemName => TitleUI.text;
-    public bool Interactable { get; private set; }
+    public bool Interactable { get; set; }
     public bool FacingUp {
         get => FaceUp.activeSelf;
         private set
@@ -78,8 +87,6 @@ public class ActionCard : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
-        Interactable = actionPointCost > 0 && phase == BattlePhase.PlayerAttack;
-
         if (phase == BattlePhase.Cleanup)
         {
             FacingUp = true;
@@ -115,17 +122,36 @@ public class ActionCard : MonoBehaviour
 
     public void HideHover()
     {
-        HoverEffect.SetActive(false);
+        if (DraggedCard != this) HoverEffect.SetActive(false);
+    }
+
+    public void StartDrag()
+    {
+        if (Interactable && DraggedCard == null)
+        {
+            HoverEffect.SetActive(true);
+            DraggedCard = this;
+        }
+    }
+
+    public void EndDrag()
+    {
+        DraggedCard = null;
+        HideHover();
+
+        if (Interactable && actionType == ActionType.Attack && Monster.HoveredMonster != null)
+        {
+            FacingUp = false;
+            OnAction?.Invoke(this, Monster.HoveredMonster);
+        }
     }
 
     public void OnClick()
     {
-        if (Interactable)
+        if (Interactable && actionType != ActionType.Attack)
         {
             FacingUp = false;
-
-            Debug.Log($"Player performas a {Value} attack with {ItemName}");
-            OnAction?.Invoke(this);
+            OnAction?.Invoke(this, null);
         }
     }
 }
