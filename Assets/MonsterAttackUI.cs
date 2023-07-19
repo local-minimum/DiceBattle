@@ -10,6 +10,12 @@ public class MonsterAttackUI : MonoBehaviour
     [SerializeField]
     TooltipedItem Tooltip;
 
+    [SerializeField]
+    Color readyColor;
+
+    [SerializeField]
+    Color cooldownColor;
+
     public void Sync(MonsterAttack attack)
     {
         if (attack == null)
@@ -21,6 +27,7 @@ public class MonsterAttackUI : MonoBehaviour
             Tooltip.enabled = true;
             Tooltip.SetTooltip(attack.Name);
             Text.text = attack.Notation;
+            Text.color = attack.CanBeUsed ? readyColor : cooldownColor;
         }
     }
 }

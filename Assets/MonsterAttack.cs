@@ -83,6 +83,11 @@ public class MonsterAttack
         cooldownCounter++;
     }
 
+    public void Use()
+    {
+        cooldownCounter = 0;
+    }
+
     public void DecayValues()
     {
         for (int i = 0,l=length; i<l; i++)

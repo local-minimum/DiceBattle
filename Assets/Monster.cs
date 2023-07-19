@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public delegate void MonsterReport(Monster monster, string report);
+public delegate void MonsterReportEvent(Monster monster, string report);
+public delegate void MonsterAttackEvent(Monster monster, MonsterAttack attack);
 
 public class Monster : MonoBehaviour
 {
-    public static event MonsterReport OnReport;
+    public static event MonsterReportEvent OnReport;
+    public static event MonsterAttackEvent OnAttack;
 
     public static Monster HoveredMonster { get; set; }
 
@@ -103,6 +105,8 @@ public class Monster : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
+        if (!Alive) return;
+
         switch (phase)
         {
             case BattlePhase.Cleanup:
@@ -117,18 +121,37 @@ public class Monster : MonoBehaviour
             case BattlePhase.UseDice:
                 SlotDice();
                 break;
+            case BattlePhase.MonsterAttack:
+                Attack();
+                break;
         }
     }
 
     int diceHeld;
     int[] diceValues;
 
+    void Attack()
+    {
+        var attack = attacks.Where(a => a.CanBeUsed && a.Attack > 0).OrderByDescending(a => a.Attack).FirstOrDefault();
+        if (attack == null)
+        {
+            OnReport?.Invoke(this, "Can not attack");
+            return;
+        }
+
+        OnAttack?.Invoke(this, attack);
+        attack.Use();
+        SyncAttacksUI();
+    }
+
     void SlotDice()
     {
-        for (int i = 0; i<diceValues.Length; i++)
+        var sortedDice = diceValues.OrderByDescending(v => v).ToArray();
+
+        for (int i = 0; i<sortedDice.Length; i++)
         {
             bool usedDie = false;
-            var value = diceValues[i];
+            var value = sortedDice[i];
             for (int j = 0; j<attacks.Length; j++)
             {
                 var attack = attacks[j];
@@ -189,6 +212,7 @@ public class Monster : MonoBehaviour
 
         if (diceCount < diceHeld && Random.value < extraDiceProb.Evaluate(t))
         {
+            Debug.Log("Extra dice");
             diceCount++;
         }
 

@@ -18,12 +18,35 @@ public class BattleLog : MonoBehaviour
         History.Clear();
         ActionCard.OnAction += ActionCard_OnAction;
         Monster.OnReport += Monster_OnReport;
+        Monster.OnAttack += Monster_OnAttack;
+        PlayerCharacter.OnHealthChange += PlayerCharacter_OnHealthChange;
     }
 
     private void OnDisable()
     {
         ActionCard.OnAction -= ActionCard_OnAction;
         Monster.OnReport -= Monster_OnReport;
+        Monster.OnAttack -= Monster_OnAttack;
+        PlayerCharacter.OnHealthChange -= PlayerCharacter_OnHealthChange;
+    }
+
+    private void PlayerCharacter_OnHealthChange(int newHealth, int delta)
+    {
+        if (delta < 0)
+        {
+            History.Enqueue($"[Player] Lost {Mathf.Abs(delta)} health ({newHealth})");
+        } else if (delta > 0)
+        {
+            History.Enqueue($"[Player] Restored {delta} health ({newHealth})");
+        }
+
+        Publish();
+    }
+
+    private void Monster_OnAttack(Monster monster, MonsterAttack attack)
+    {
+        History.Enqueue($"[{monster.Name}] Does {attack.Name} with strength {attack.Attack}");
+        Publish();
     }
 
     private void Monster_OnReport(Monster monster, string report)
@@ -55,6 +78,7 @@ public class BattleLog : MonoBehaviour
                 }
             }
         }
+
         Publish();
     }
 
