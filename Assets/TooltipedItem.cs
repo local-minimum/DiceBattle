@@ -11,6 +11,13 @@ public class TooltipedItem : MonoBehaviour
     string tooltip;
     public string Tooltip => tooltip;
 
+    public void SetTooltip(string value)
+    {
+        tooltip = value;
+
+        if (hovered) OnTooltip?.Invoke(this, true);
+    }
+
     public static event TooltipEvent OnTooltip;
 
     EventTrigger _eventTrigger;
@@ -63,14 +70,17 @@ public class TooltipedItem : MonoBehaviour
         trigger.triggers.Remove(pointerExitEntry);
     }
 
+    bool hovered = false;
 
     void ShowTooltip()
     {
+        hovered = true;
         OnTooltip?.Invoke(this, true);
     }
 
     void HideTooltip()
     {
+        hovered = false;
         OnTooltip?.Invoke(this, false);
     }
 }

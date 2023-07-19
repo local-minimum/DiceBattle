@@ -17,11 +17,19 @@ public class BattleLog : MonoBehaviour
     {
         History.Clear();
         ActionCard.OnAction += ActionCard_OnAction;
+        Monster.OnReport += Monster_OnReport;
     }
 
     private void OnDisable()
     {
         ActionCard.OnAction -= ActionCard_OnAction;
+        Monster.OnReport -= Monster_OnReport;
+    }
+
+    private void Monster_OnReport(Monster monster, string report)
+    {
+        History.Enqueue($"[{monster.Name}] {report}");
+        Publish();
     }
 
     private void ActionCard_OnAction(ActionCard card, Monster receiver)
