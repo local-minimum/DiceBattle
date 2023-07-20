@@ -6,8 +6,6 @@ using UnityEngine.UI;
 public delegate void RecycledDieEvent(int value);
 public delegate void DieDropZoneChangeEvent(DieDropZone dropZone);
 
-public enum DieEffect { Add, Subtract };
-
 public class DieDropZone : MonoBehaviour
 {
     public static event RecycledDieEvent OnRecycleDie;

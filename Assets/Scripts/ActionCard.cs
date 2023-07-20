@@ -5,7 +5,7 @@ using UnityEngine;
 
 public delegate void ActionCardEvent(ActionCard card, Monster reciever);
 
-public enum ActionType { Attack, Defence, Passive }
+public enum UtilityType { Heal };
 
 public class ActionCard : MonoBehaviour
 {
@@ -55,6 +55,12 @@ public class ActionCard : MonoBehaviour
                 HideHover();
             }
         }
+    }
+
+    public void Configure(ActionCardSetting settings, List<int> dice)
+    {
+        TitleUI.text = settings.Name;
+        actionType = settings.ActionType;
     }
 
     public int Value => dropZones.Sum(dz => dz.Value);

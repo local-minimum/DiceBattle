@@ -11,7 +11,10 @@ public class ActionCardGroup : MonoBehaviour
     [SerializeField]
     int saveableActions = 0;
 
-    ActionCard[] actionCards;
+    List<ActionCard> actionCards = new List<ActionCard>();
+
+    [SerializeField]
+    int handSize = 2;
 
     public int ActionPoints
     {
@@ -22,7 +25,7 @@ public class ActionCardGroup : MonoBehaviour
 
     private void OnEnable()
     {
-        actionCards = GetComponentsInChildren<ActionCard>();
+        actionCards.AddRange(GetComponentsInChildren<ActionCard>());
 
         Battle.OnChangePhase += Battle_OnChangePhase;
         ActionCard.OnAction += ActionCard_OnAction;
@@ -51,8 +54,49 @@ public class ActionCardGroup : MonoBehaviour
                 SyncCards();
                 break;
             case BattlePhase.Cleanup:
+                DrawHand();
                 RestoreActionPoints();
                 break;
+        }
+    }
+
+    [SerializeField]
+    ActionCard CardPrefab;
+
+    [SerializeField]
+    ActionDeck deck;
+
+    ActionCard GetCard(int idx)
+    {
+        if (idx >= actionCards.Count)
+        {
+            var card = Instantiate(CardPrefab, transform);
+
+            actionCards.Add(card);
+
+            return card;
+        }
+
+        return actionCards[idx];
+    }
+
+    Dictionary<ActionCardSetting, List<int>> SlotedDiceCache = new Dictionary<ActionCardSetting, List<int>>();
+
+    void DrawHand()
+    {
+        var idx = 0;
+        foreach (var cardSettings in deck.Draw(handSize))
+        {
+            Debug.Log($"{idx}: {cardSettings.Name}");
+            var card = GetCard(idx);
+            card.Configure(cardSettings, SlotedDiceCache.GetValueOrDefault(cardSettings));
+            card.gameObject.SetActive(true);
+            idx++;
+        }
+
+        for (; idx < actionCards.Count; idx++)
+        {
+            actionCards[idx].gameObject.SetActive(false);
         }
     }
 
@@ -64,10 +108,10 @@ public class ActionCardGroup : MonoBehaviour
     void SyncCards()
     {
         bool anyInteractable = false;
-        for (int i = 0; i<actionCards.Length; i++)
+        for (int i = 0; i<actionCards.Count; i++)
         {
             var card = actionCards[i];
-            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action != ActionType.Passive)
+            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action == ActionType.Attack)
             {
                 anyInteractable = true;
                 card.Interactable = true;

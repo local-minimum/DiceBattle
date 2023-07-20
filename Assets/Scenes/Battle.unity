@@ -3223,6 +3223,7 @@ GameObject:
   - component: {fileID: 1873774833}
   - component: {fileID: 1873774834}
   - component: {fileID: 1873774835}
+  - component: {fileID: 1873774836}
   m_Layer: 5
   m_Name: ActionCards
   m_TagString: Untagged
@@ -3343,7 +3344,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minActionsPerRound: 1000
   saveableActions: 0
+  handSize: 2
+  CardPrefab: {fileID: 1739404091284834232, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
+  deck: {fileID: 1873774836}
   triggerDelay: 0.5
+--- !u!114 &1873774836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873774830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5c621c4361fdf147bec371d09e05a1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Deck:
+  - {fileID: 11400000, guid: 2ac73cba1215d134e870788070e51b61, type: 2}
+  - {fileID: 11400000, guid: 079943638f4b86e4993aa1c4545e42d0, type: 2}
+  - {fileID: 11400000, guid: 87ccd3a66d23125419e70c3109b05c1f, type: 2}
+  - {fileID: 11400000, guid: 1369d9f77ae89ee4ba861d66fae677fa, type: 2}
+  - {fileID: 11400000, guid: 187ce6afc4593ba43b60a07860b4b432, type: 2}
+  - {fileID: 11400000, guid: 187ce6afc4593ba43b60a07860b4b432, type: 2}
+  - {fileID: 11400000, guid: 187ce6afc4593ba43b60a07860b4b432, type: 2}
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
 --- !u!1001 &1875567648
 PrefabInstance:
   m_ObjectHideFlags: 0
