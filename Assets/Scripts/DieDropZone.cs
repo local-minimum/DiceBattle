@@ -26,6 +26,9 @@ public class DieDropZone : MonoBehaviour
     Color ValueDieColor;
 
     [SerializeField]
+    Color ValueLockedDieColor;
+
+    [SerializeField]
     float hoverScale = 1.1f;
 
     [SerializeField]
@@ -44,10 +47,16 @@ public class DieDropZone : MonoBehaviour
     bool holdsDie = false;
     public bool HoldsDie => holdsDie;
 
+    public bool CanTakeDie
+    {
+        get; private set;
+    }
+
+
     bool hovered = false;
     public void OnHoverStart()
     {
-        if (Die.DraggedDie != null)
+        if (Die.DraggedDie != null && CanTakeDie)
         {
             ApplyEffect(HoverColor, hoverScale);
             hovered = true;
@@ -56,7 +65,7 @@ public class DieDropZone : MonoBehaviour
 
     public void OnHoverEnd()
     {
-        if (hovered)
+        if (hovered && CanTakeDie)
         {
             ApplyEffect(DefaultColor, 1f);
             hovered = false;
@@ -71,6 +80,7 @@ public class DieDropZone : MonoBehaviour
 
     public void Clear()
     {
+        CanTakeDie = true;
         holdsDie = false;
         DiceValue = spawnValue;
         TextUI.color = ValueDefaultColor;
@@ -93,6 +103,9 @@ public class DieDropZone : MonoBehaviour
 
     public void CleanUp()
     {
+        CanTakeDie = true;
+        TextUI.color = holdsDie ? ValueDieColor : DefaultColor;
+
         if (holdsDie && DiceValue > 1) { 
             DiceValue--; 
             OnChange?.Invoke(this);
@@ -101,7 +114,7 @@ public class DieDropZone : MonoBehaviour
 
     private void Die_OnDropDie(Die die)
     {
-        if (!hovered || !die.Interactable) return;
+        if (!CanTakeDie || !hovered || !die.Interactable) return;
 
         if (holdsDie)
         {
@@ -109,10 +122,10 @@ public class DieDropZone : MonoBehaviour
         }
 
         DiceValue = die.Value;
-        TextUI.color = ValueDieColor;
+        TextUI.color = ValueLockedDieColor;
         die.NoDice();
         holdsDie = true;
-
+        CanTakeDie = false;
         OnChange?.Invoke(this);
     }
 

@@ -14,6 +14,9 @@ public class DiceManager : MonoBehaviour
     [SerializeField]
     Die[] dice;
 
+    [SerializeField]
+    ActionCardGroup actionCardGroup;
+
     public int diceCount = 20;
 
     public int maxHandSize = 4;
@@ -48,7 +51,7 @@ public class DiceManager : MonoBehaviour
                 RollSelectedDice();
                 break;
             case BattlePhase.UseDice:
-                if (!HasDiceRemaining())
+                if (!HasDiceThatCanBeSlotted())
                 {
                     Battle.Phase = Battle.Phase.NextPhase();
                 }
@@ -166,7 +169,7 @@ public class DiceManager : MonoBehaviour
         Battle.Phase = BattlePhase.RollDice;
     }
 
-    public bool HasDiceRemaining()
+    public bool HasRemainingRolledDice()
     {
         for (int i = 0; i<dice.Length; i++)
         {
@@ -176,5 +179,12 @@ public class DiceManager : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public bool HasDiceThatCanBeSlotted()
+    {
+        if (!HasRemainingRolledDice()) return false;
+
+        return actionCardGroup.SlottablePositions > 0;
     }
 }

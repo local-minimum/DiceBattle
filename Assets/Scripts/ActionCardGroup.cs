@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ActionCardGroup : MonoBehaviour
@@ -16,6 +17,8 @@ public class ActionCardGroup : MonoBehaviour
     {
         get; private set;
     }
+
+    public int SlottablePositions => actionCards.Sum(c => c.OpenSlots);
 
     private void OnEnable()
     {
@@ -64,7 +67,7 @@ public class ActionCardGroup : MonoBehaviour
         for (int i = 0; i<actionCards.Length; i++)
         {
             var card = actionCards[i];
-            if (card.ActionPoints <= ActionPoints && card.Action != ActionType.Passive)
+            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action != ActionType.Passive)
             {
                 anyInteractable = true;
                 card.Interactable = true;

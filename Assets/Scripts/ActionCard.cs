@@ -59,6 +59,8 @@ public class ActionCard : MonoBehaviour
 
     public int Value => dropZones.Sum(dz => dz.Value);
 
+    public int OpenSlots => dropZones.Count(dz => dz.CanTakeDie);
+
     private void Awake()
     {
         dropZones.AddRange(GetComponentsInChildren<DieDropZone>(true));

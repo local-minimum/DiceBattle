@@ -93,7 +93,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 43.4
+  m_fontSize: 18
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -244,9 +244,11 @@ MonoBehaviour:
   DefaultColor: {r: 0.14117648, g: 0.14117648, b: 0.14117648, a: 1}
   ValueDefaultColor: {r: 0.5304379, g: 0.7502323, b: 0.754717, a: 0.85882354}
   ValueDieColor: {r: 0.5849056, g: 0.03034888, b: 0.03034888, a: 1}
+  ValueLockedDieColor: {r: 0.9433962, g: 0.7164471, b: 0.9227645, a: 1}
   hoverScale: 1.1
   backgroundImage: {fileID: 3786344719475629229}
   spawnValue: 0
+  dieEffect: 0
   TextUI: {fileID: 3786344719221383226}
 --- !u!114 &3786344719475629225
 MonoBehaviour:

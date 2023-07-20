@@ -138,7 +138,7 @@ public class Die : MonoBehaviour
         Dragging = false;
         OnDropDie?.Invoke(this);
 
-        if (!diceManager.HasDiceRemaining())
+        if (!diceManager.HasDiceThatCanBeSlotted())
         {
             Battle.Phase = Battle.Phase.NextPhase();
         }

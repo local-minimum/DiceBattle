@@ -983,6 +983,7 @@ MonoBehaviour:
   - {fileID: 882806367}
   - {fileID: 1543354481}
   - {fileID: 795438897}
+  actionCardGroup: {fileID: 1873774835}
   diceCount: 20
   maxHandSize: 4
 --- !u!114 &808170741
@@ -3219,9 +3220,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1873774831}
-  - component: {fileID: 1873774832}
   - component: {fileID: 1873774833}
   - component: {fileID: 1873774834}
+  - component: {fileID: 1873774835}
   m_Layer: 5
   m_Name: ActionCards
   m_TagString: Untagged
@@ -3245,25 +3246,11 @@ RectTransform:
   m_Father: {fileID: 1331660288}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: -0.2}
-  m_AnchorMax: {x: 0.9, y: -0.2}
-  m_AnchoredPosition: {x: 0, y: -110}
-  m_SizeDelta: {x: 0, y: 350}
+  m_AnchorMin: {x: 0, y: 0.18}
+  m_AnchorMax: {x: 1, y: 0.7}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0}
---- !u!114 &1873774832
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1873774830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c305b85b08fbe94eb94bf511b2d126d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  placementStart: 0
-  anglePadding: 0
 --- !u!114 &1873774833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3325,9 +3312,24 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 0
   TargetY:
-  - -135
+  - -120
   - 0
 --- !u!114 &1873774834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873774830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a19fe2a2e5217bd469dc975020ca57cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemWidthFraction: 0.2
+  itemSpacingFraction: 0.01
+  center: 1
+--- !u!114 &1873774835
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3339,9 +3341,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95259ce7a9517da4b9a1c18b2984f852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minActionsPerRound: 3
+  minActionsPerRound: 1000
   saveableActions: 0
-  triggerDelay: 1
+  triggerDelay: 0.5
 --- !u!1001 &1875567648
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3806,27 +3808,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.5
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.5
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 250
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3858,11 +3860,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -225.4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 192.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091284834237, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
