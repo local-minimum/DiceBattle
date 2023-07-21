@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UI;
 using UnityEngine;
 
 public delegate void ActionCardEvent(ActionCard card, Monster reciever);
@@ -25,6 +26,9 @@ public class ActionCard : MonoBehaviour
 
     [SerializeField]
     TMPro.TextMeshProUGUI TitleUI;
+
+    [SerializeField]
+    Image ImageUI;
 
     [SerializeField]
     GameObject HoverEffect;
@@ -73,10 +77,36 @@ public class ActionCard : MonoBehaviour
         return slot;
     }
 
+    ActionCardSetting settings;
+
+    public void Store(ref Dictionary<ActionCardSetting, List<int>> cache)
+    {
+        if (settings == null) return;
+
+        List<int> dice = new List<int>();
+
+        foreach (var dz in VisibleZones)
+        {
+            dz.CleanUp();
+            dice.Add(dz.HoldsDie ? dz.Value : 0);
+        }
+
+        cache[settings] = dice;
+
+        settings = null;
+    }
+
     public void Configure(ActionCardSetting settings, List<int> dice)
     {
+        this.settings = settings;
+
         TitleUI.text = settings.Name;
+
+        ImageUI.sprite = settings.Sprite;
+        ImageUI.color = settings.Sprite == null ? Color.black : Color.white;
+
         actionType = settings.ActionType;
+
         int idx = 0;
         for (;idx<settings.Slots.Length; idx++)
         {

@@ -91,7 +91,10 @@ public class ActionCardGroup : MonoBehaviour
         {
             Debug.Log($"{idx}: {cardSettings.Name}");
             var card = GetCard(idx);
+
+            card.Store(ref SlotedDiceCache);
             card.Configure(cardSettings, SlotedDiceCache.GetValueOrDefault(cardSettings));
+
             card.gameObject.SetActive(true);
             idx++;
         }

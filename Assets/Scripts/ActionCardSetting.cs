@@ -20,4 +20,5 @@ public class ActionCardSetting : ScriptableObject
     public string Name;
     public ActionType ActionType;
     public DiceSlot[] Slots;
+    public Sprite Sprite;
 }
