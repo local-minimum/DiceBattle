@@ -77,11 +77,11 @@ public class ActionCard : MonoBehaviour
         return slot;
     }
 
-    ActionCardSetting settings;
+    int cardId;
 
-    public void Store(ref Dictionary<ActionCardSetting, List<int>> cache)
+    public void Store(ref Dictionary<int, List<int>> cache)
     {
-        if (settings == null) return;
+        if (cardId < 0) return;
 
         List<int> dice = new List<int>();
 
@@ -91,14 +91,14 @@ public class ActionCard : MonoBehaviour
             dice.Add(dz.HoldsDie ? dz.Value : 0);
         }
 
-        cache[settings] = dice;
+        cache[cardId] = dice;
 
-        settings = null;
+        cardId = -1;
     }
 
-    public void Configure(ActionCardSetting settings, List<int> dice)
+    public void Configure(int cardId, ActionCardSetting settings, List<int> dice)
     {
-        this.settings = settings;
+        this.cardId = cardId;
 
         TitleUI.text = settings.Name;
 

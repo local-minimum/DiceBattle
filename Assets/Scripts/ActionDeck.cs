@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ActionDeck : MonoBehaviour
@@ -7,29 +8,30 @@ public class ActionDeck : MonoBehaviour
     [SerializeField]
     List<ActionCardSetting> Deck = new List<ActionCardSetting>();
 
-    List<ActionCardSetting> UsedCards = new List<ActionCardSetting>();
+    List<int> DrawPile = new List<int>();
+    List<int> DiscardPile = new List<int>();
 
-    public IEnumerable<ActionCardSetting> Draw(int count)
+    public IEnumerable<KeyValuePair<int, ActionCardSetting>> Draw(int count)
     {
         for (int i = 0; i<count; i++)
         {
-            if (Deck.Count == 0)
+            if (DrawPile.Count == 0)
             {
-                Deck.AddRange(UsedCards);
+                DrawPile.AddRange(DiscardPile);
             }
 
-            var idx = Random.Range(0, Deck.Count);
-            var card = Deck[idx];
-            yield return Deck[idx];
+            var cardId = DrawPile[Random.Range(0, DrawPile.Count)];
 
-            Deck.Remove(card);
-            UsedCards.Add(card);
+            yield return new KeyValuePair<int, ActionCardSetting>(cardId, Deck[cardId]);
+
+            DrawPile.Remove(cardId);
+            DiscardPile.Add(cardId);
         }
     }
 
     private void OnEnable()
     {
-        Deck.AddRange(UsedCards);
-        UsedCards.Clear();
+        DiscardPile.Clear();
+        DrawPile = Enumerable.Range(0, Deck.Count).ToList();
     }
 }

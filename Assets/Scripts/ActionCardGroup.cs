@@ -82,18 +82,18 @@ public class ActionCardGroup : MonoBehaviour
         return actionCards[idx];
     }
 
-    Dictionary<ActionCardSetting, List<int>> SlotedDiceCache = new Dictionary<ActionCardSetting, List<int>>();
+    Dictionary<int, List<int>> SlotedDiceCache = new Dictionary<int, List<int>>();
 
     void DrawHand()
     {
         var idx = 0;
-        foreach (var cardSettings in deck.Draw(handSize))
+        foreach (var (cardId, cardSettings) in deck.Draw(handSize))
         {
             Debug.Log($"{idx}: {cardSettings.Name}");
             var card = GetCard(idx);
 
             card.Store(ref SlotedDiceCache);
-            card.Configure(cardSettings, SlotedDiceCache.GetValueOrDefault(cardSettings));
+            card.Configure(cardId, cardSettings, SlotedDiceCache.GetValueOrDefault(cardId));
 
             card.gameObject.SetActive(true);
             idx++;
