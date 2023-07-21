@@ -12,15 +12,25 @@ public class PlayerCharacter : MonoBehaviour
     int startHealth = 42;
 
     [SerializeField]
+    float showDeltaTime = 1;
+
+    [SerializeField]
     TMPro.TextMeshProUGUI HealthText;
 
     int _health;
+    bool showingDelta = false;
+    float showHealthTime;
+
     public int Health {
         get => _health;
         set
         {
-            _health = value;
-            HealthText.text = value.ToString();
+            int newHealth = Mathf.Max(0, value);
+            int delta = newHealth - _health;
+            _health = newHealth;
+            HealthText.text = delta.ToString();
+            showHealthTime = showDeltaTime + Time.timeSinceLevelLoad;
+            showingDelta = true;
         }
     }
 
@@ -61,8 +71,15 @@ public class PlayerCharacter : MonoBehaviour
         }
     }
 
+
     private void Update()
     {
+        if (showingDelta && Time.timeSinceLevelLoad > showHealthTime)
+        {
+            showingDelta = false;
+            HealthText.text = _health.ToString();
+        }
+
         foreach (var change in healthChanges)
         {
             OnHealthChange?.Invoke(change.Health, change.Delta);
