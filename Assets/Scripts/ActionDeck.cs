@@ -26,4 +26,10 @@ public class ActionDeck : MonoBehaviour
             UsedCards.Add(card);
         }
     }
+
+    private void OnEnable()
+    {
+        Deck.AddRange(UsedCards);
+        UsedCards.Clear();
+    }
 }

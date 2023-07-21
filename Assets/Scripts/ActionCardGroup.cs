@@ -25,7 +25,9 @@ public class ActionCardGroup : MonoBehaviour
 
     private void OnEnable()
     {
+        actionCards.Clear();
         actionCards.AddRange(GetComponentsInChildren<ActionCard>());
+        SlotedDiceCache.Clear();
 
         Battle.OnChangePhase += Battle_OnChangePhase;
         ActionCard.OnAction += ActionCard_OnAction;

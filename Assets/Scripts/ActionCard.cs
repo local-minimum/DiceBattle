@@ -57,15 +57,49 @@ public class ActionCard : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    DieDropZone dropZonePrefab;
+
+    [SerializeField]
+    Transform dropZonesParent;
+
+    DieDropZone GetSlot(int idx)
+    {
+        if (idx < dropZones.Count) return dropZones[idx];
+
+        var slot = Instantiate(dropZonePrefab, dropZonesParent);
+        dropZones.Add(slot);
+
+        return slot;
+    }
+
     public void Configure(ActionCardSetting settings, List<int> dice)
     {
         TitleUI.text = settings.Name;
         actionType = settings.ActionType;
+        int idx = 0;
+        for (;idx<settings.Slots.Length; idx++)
+        {
+            var slotConfig = settings.Slots[idx];
+            bool hasDie = dice != null && idx < dice.Count && dice[idx] != 0;
+            int slotValue = hasDie ? dice[idx] : slotConfig.DefaultValue;
+            var slot = GetSlot(idx);
+
+            slot.Configure(slotConfig.Effect, slotValue, hasDie);
+
+            dropZones[idx].gameObject.SetActive(true);
+        }
+
+        for (var l = dropZones.Count; idx<l; idx++)
+        {
+            dropZones[idx].gameObject.SetActive(false);
+        }
     }
 
-    public int Value => dropZones.Sum(dz => dz.Value);
+    private IEnumerable<DieDropZone> VisibleZones => dropZones.Where(dz => dz.gameObject.activeSelf);
+    public int Value => VisibleZones.Sum(dz => dz.Value);
 
-    public int OpenSlots => dropZones.Count(dz => dz.CanTakeDie);
+    public int OpenSlots => VisibleZones.Count(dz => dz.CanTakeDie);
 
     private void Awake()
     {
@@ -98,10 +132,6 @@ public class ActionCard : MonoBehaviour
         if (phase == BattlePhase.Cleanup)
         {
             FacingUp = true;
-            foreach (var dz in dropZones)
-            {
-                dz.CleanUp();
-            }
         }
     }
 
