@@ -28,13 +28,29 @@ public class Monster : MonoBehaviour
     [SerializeField]
     GameObject BaseCard;
 
+    [SerializeField]
+    float changeShowDuration = 1f;
+
+    bool showingHealthChange;
+    float showHealthTime;
+
     private int _health;
     public int Health { 
         get => _health; 
         set
         {
-            _health = Mathf.Max(0, value);
-            HealthText.text = _health.ToString();
+            int newValue = Mathf.Max(0, value);
+            int change = newValue - _health;
+            _health = newValue;
+            if (change != 0)
+            {
+                HealthText.text = change.ToString();
+                showHealthTime = Time.timeSinceLevelLoad + changeShowDuration;
+                showingHealthChange = true;
+            } else
+            {
+                HealthText.text = newValue.ToString();
+            }
 
             if (_health == 0)
             {
@@ -247,6 +263,12 @@ public class Monster : MonoBehaviour
 
     private void Update()
     {
+        if (showingHealthChange && Time.timeSinceLevelLoad > showHealthTime)
+        {
+            showingHealthChange = false;
+            HealthText.text = _health.ToString();
+        }
+
         if (!Alive && BaseCard.activeSelf && Time.timeSinceLevelLoad > deathHide)
         {
             BaseCard.SetActive(false);
