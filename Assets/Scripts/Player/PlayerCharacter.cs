@@ -49,9 +49,9 @@ public class PlayerCharacter : MonoBehaviour
 
     List<HealthChange> healthChanges = new List<HealthChange>();
 
-    private void Monster_OnAttack(Monster monster, MonsterAttack attack)
+    private void Monster_OnAttack(Monster monster, MonsterAction action)
     {
-        var dmg = Mathf.Min(attack.Attack - Defence, Health);
+        var dmg = Mathf.Min(action.Value - Defence, Health);
         if (dmg > 0)
         {
             Health -= dmg;

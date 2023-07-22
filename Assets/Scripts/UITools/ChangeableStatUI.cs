@@ -65,7 +65,6 @@ public class ChangeableStatUI : MonoBehaviour
             }
 
             _value += diff;
-            StatText.text = _value.ToString();
 
             if (diff != 0) {
                 ChangeText.text = diff.ToString();
@@ -132,6 +131,8 @@ public class ChangeableStatUI : MonoBehaviour
 
         if (Time.timeSinceLevelLoad > animEndTime)
         {
+            StatText.text = _value.ToString();
+
             HideChange();
             return;
         }

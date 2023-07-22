@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 public delegate void MonsterReportEvent(Monster monster, string report);
-public delegate void MonsterAttackEvent(Monster monster, MonsterAttack attack);
+public delegate void MonsterAttackEvent(Monster monster, MonsterAction attack);
 
 public class Monster : MonoBehaviour
 {
@@ -59,40 +59,81 @@ public class Monster : MonoBehaviour
     int startDice;
 
     [SerializeField]
+    int minDicePerTurn = 1;
+
+    [SerializeField]
+    int maxDicePerTurn = 3;
+
+    [SerializeField]
     AnimationCurve extraDiceProb;
 
     [SerializeField]
-    MonsterAttack[] attacks;
+    MonsterActionSetting[] actionSettings;
 
     [SerializeField]
-    MonsterAttackUI[] attackUI;
+    MonsterAction actionPrefab;
+
+    [SerializeField]
+    RectTransform actionsRoot;
+
+    [SerializeField]
+    MonsterActionPreviewUI actionPreviewPrefab;
+
+    [SerializeField]
+    RectTransform actionsPreviewsRoot;
+
+    List<MonsterActionPreviewUI> actionPreviews = new List<MonsterActionPreviewUI>();
+
+    List<MonsterAction> actions = new List<MonsterAction>();
+
+    MonsterAction GetAction(int index)
+    {
+        if (index < actions.Count) return actions[index];
+
+        var action = Instantiate(actionPrefab, actionsRoot);
+
+        actions.Add(action);
+
+        return action;
+    }
 
     public int XpReward => xpReward;
 
-    int _defence;
+    int _baseDefence;
     public int Defence { 
-        get => _defence; 
-        set
-        {
-            _defence = value;
-            DefenceText.text = _defence.ToString();
-        }
+        get => _baseDefence; 
     }
 
     public string Name => NameText.text;
 
     public bool Alive => Health > 0;
 
+    private void Awake()
+    {
+        actions.AddRange(actionsRoot.GetComponentsInChildren<MonsterAction>());
+        actionPreviews.AddRange(actionsPreviewsRoot.GetComponentsInChildren<MonsterActionPreviewUI>());        
+    }
+
     private void OnEnable()
     {
         diceHeld = startDice;
-        for (int i = 0; i<attacks.Length; i++)
+
+        int idx = 0;
+        for (; idx<actionSettings.Length; idx++)
         {
-            attacks[i].Reset();
+            var action = GetAction(idx);
+
+            action.Config(actionSettings[idx]);
+            action.gameObject.SetActive(false);
+        }
+
+        for (var l = actions.Count; idx<l; idx++)
+        {
+            actions[idx].gameObject.SetActive(false);
         }
 
         _health.SetValueWithoutChange(startHealth);
-        Defence = startDefence;
+
         Battle.OnChangePhase += Battle_OnChangePhase;
     }
 
@@ -130,7 +171,7 @@ public class Monster : MonoBehaviour
 
     void Attack()
     {
-        var attack = attacks.Where(a => a.CanBeUsed && a.Attack > 0).OrderByDescending(a => a.Attack).FirstOrDefault();
+        var attack = actions.Where(a => a.CanBeUsed).OrderByDescending(a => a.Value).FirstOrDefault();
         if (attack == null)
         {
             OnReport?.Invoke(this, "Can not attack");
@@ -139,23 +180,24 @@ public class Monster : MonoBehaviour
 
         OnAttack?.Invoke(this, attack);
         attack.Use();
-        SyncAttacksUI();
+        SyncActionPreviews();
     }
 
     void SlotDice()
     {
         var sortedDice = diceValues.OrderByDescending(v => v).ToArray();
+        var sortedActions = actions.OrderBy(a => !a.CanBeUsed).ThenBy(a => a.Cooldown).ToArray();
 
         for (int i = 0; i<sortedDice.Length; i++)
         {
             bool usedDie = false;
             var value = sortedDice[i];
-            for (int j = 0; j<attacks.Length; j++)
+            for (int j = 0, l=sortedActions.Length; j<l; j++)
             {
-                var attack = attacks[j];
-                if (!attack.CanBeUsed) continue;
+                var action = sortedActions[j];
+                if (!action.CanBeUsed) continue;
 
-                if (attack.TakeDie(value))
+                if (action.TakeDie(value))
                 {
                     usedDie = true;
                     break;
@@ -164,12 +206,12 @@ public class Monster : MonoBehaviour
 
             if (usedDie) continue;
 
-            for (int j = 0; j<attacks.Length; j++)
+            for (int j = 0, l=sortedActions.Length; j<l; j++)
             {
-                var attack = attacks[j];
-                if (attack.CanBeUsed) continue;
+                var action = sortedActions[j];
+                if (action.CanBeUsed) continue;
 
-                if (attack.TakeDie(value))
+                if (action.TakeDie(value))
                 {
                     break;
                 }
@@ -177,9 +219,9 @@ public class Monster : MonoBehaviour
 
         }
 
-        StatusText.text = "";
+        StatusText.text = "Slotted dice / waiting on turn";
 
-        SyncAttacksUI();
+        SyncActionPreviews();
     }
 
     void RollDice()
@@ -205,7 +247,7 @@ public class Monster : MonoBehaviour
 
     void SelectNumberAndRollDice()
     {
-        var diceCount = Mathf.Min(attacks.Where(a => a.CanBeUsed).Sum(a => a.SuggestDiceThrowCount()), diceHeld);
+        var diceCount = Mathf.Min(actions.Where(a => a.CanBeUsed).Sum(a => a.SuggestDiceThrowCount()), diceHeld);
         var t = 1f - ((float)diceHeld - diceCount) / startDice;
 
         if (diceCount < diceHeld && Random.value < extraDiceProb.Evaluate(t))
@@ -214,6 +256,7 @@ public class Monster : MonoBehaviour
             diceCount++;
         }
 
+        diceCount = Mathf.Min(diceHeld, Mathf.Clamp(diceCount, minDicePerTurn, maxDicePerTurn));
         diceHeld -= diceCount;
         diceValues = new int[diceCount];
 
@@ -224,22 +267,40 @@ public class Monster : MonoBehaviour
 
     void Cleanup()
     {
-        for (int i = 0; i<attacks.Length; i++)
+        for (int i = 0,l=actions.Count; i<l; i++)
         {
-            var attack = attacks[i];
+            var action = actions[i];
 
-            attack.DecayValues();
-            attack.NewTurn();
+            action.DecayDice();
+            action.NewTurn();
         }
-        SyncAttacksUI();
+        SyncActionPreviews();
     }
 
-    void SyncAttacksUI()
+    MonsterActionPreviewUI ActionPreview(int index)
     {
-        var visible = attacks.OrderBy(a => !a.CanBeUsed).Take(attackUI.Length).ToArray();
-        for (int i = 0; i<attackUI.Length; i++)
+        if (index < actionPreviews.Count) return actionPreviews[index];
+
+        var preview = Instantiate(actionPreviewPrefab, actionsPreviewsRoot);
+        actionPreviews.Add(preview);
+
+        return preview;
+    }
+
+    void SyncActionPreviews()
+    {
+        var sorted = actions.OrderBy(a => !a.CanBeUsed).ThenBy(a => a.Cooldown).ToArray();
+        int idx = 0;
+        for (; idx<sorted.Length; idx++)
         {
-            attackUI[i].Sync(i < visible.Length ? visible[i] : null);
+            var preview = ActionPreview(idx);
+            preview.Sync(sorted[idx]);
+            preview.gameObject.SetActive(true);
+        }
+
+        for (var l = actionPreviews.Count; idx<l; idx++)
+        {
+            actionPreviews[idx].gameObject.SetActive(false);
         }
     }
 

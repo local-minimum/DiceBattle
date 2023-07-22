@@ -43,9 +43,9 @@ public class BattleLog : MonoBehaviour
         Publish();
     }
 
-    private void Monster_OnAttack(Monster monster, MonsterAttack attack)
+    private void Monster_OnAttack(Monster monster, MonsterAction action)
     {
-        History.Enqueue($"[{monster.Name}] Does {attack.Name} with strength {attack.Attack}");
+        History.Enqueue($"[{monster.Name}] Does {action.Name} with strength {action.Value}");
         Publish();
     }
 

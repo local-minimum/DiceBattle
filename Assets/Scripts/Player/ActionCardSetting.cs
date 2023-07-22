@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum DieEffect { Add, Subtract };
 
-public enum ActionType { Attack, Defence, Utility }
+public enum ActionType { Attack, Defence, Healing }
 
 [System.Serializable]
 public struct DiceSlot

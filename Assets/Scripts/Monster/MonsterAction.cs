@@ -1,0 +1,133 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public class MonsterAction : MonoBehaviour
+{
+    MonsterActionSetting settings;
+
+    int cooldown = 0;
+
+    int[] diceValues;
+
+    public IEnumerable<int> DiceValues(bool withSign)
+    {
+        for (int i = 0; i<diceValues.Length; i++)
+        {
+            var dieValue = diceValues[i] != 0 ? diceValues[i] : settings.Slots[i].DefaultValue;
+            yield return withSign && settings.Slots[i].Effect == DieEffect.Subtract ? -dieValue : dieValue;
+        }
+    }
+
+    public string Name => settings.Name;
+
+    public Sprite Sprite => settings.Sprite;
+
+    public int Value => DiceValues(true).Sum();
+
+    public void Config(MonsterActionSetting setting)
+    {
+        this.settings = setting;
+        diceValues = new int[setting.Slots.Length];
+    }
+
+    public bool IsAttack => settings.ActionType == ActionType.Attack;
+
+    public bool CanBeUsed => settings != null && cooldown >= settings.Cooldown && Value != 0;
+
+    public int Cooldown => Mathf.Max(0, settings.Cooldown - cooldown);
+
+    public void Use()
+    {
+        cooldown = 0;
+    }
+
+    public void NewTurn()
+    {
+        cooldown++;
+    }
+
+    public void DecayDice()
+    {
+        for (int i=0; i<diceValues.Length; i++)
+        {
+            if (diceValues[i] == 0) continue;
+
+            diceValues[i] = Mathf.Max(1, diceValues[i] - 1);
+        }
+    }
+
+    public bool TakeDie(int value)
+    {
+        int pos = -1;
+        int delta = 0;
+        int currentDelta = 0;
+        var currentDiceValues = DiceValues(false).ToArray();
+        for (int i = 0,l=settings.Slots.Length; i<l; i++)
+        {
+            var slot = settings.Slots[i];
+            switch (slot.Effect)
+            {
+                case DieEffect.Add:
+                    currentDelta = value - currentDiceValues[i];
+                    break;
+                case DieEffect.Subtract:
+                    currentDelta = currentDiceValues[i] - value;
+                    break;
+                default:
+                    Debug.LogWarning($"Monster attack '{name}', die index {i} has effect {slot.Effect} which is unknown");
+                    break;
+            }
+            if (currentDelta > delta)
+            {
+                delta = currentDelta;
+                pos = i;
+            }
+        }
+
+        if (pos == -1) return false;
+
+        diceValues[pos] = value;
+        return true;
+    }
+    public int SuggestDiceThrowCount()
+    {
+        int maybes = 0;
+        int wants = 0;
+        var currentDiceValues = DiceValues(false).ToArray();
+        for (int i = 0, l = settings.Slots.Length; i < l; i++)
+        {
+            var slot = settings.Slots[i];
+            int value = currentDiceValues[i];
+            switch (slot.Effect)
+            {
+                case DieEffect.Add:
+                    if (value < 3)
+                    {
+                        wants++;
+                    }
+                    else if (value == 4)
+                    {
+                        maybes++;
+                    }
+                    break;
+                case DieEffect.Subtract:
+                    if (value > 2)
+                    {
+                        wants++;
+                    }
+                    else if (value == 2)
+                    {
+                        maybes++;
+                    }
+                    break;
+                default:
+                    Debug.LogWarning($"Monster attack '{name}', die index {i} has effect {slot.Effect} which is unknown");
+                    break;
+            }
+        }
+
+        return wants + (maybes > 1 ? maybes / 2 : maybes);
+    }
+}
