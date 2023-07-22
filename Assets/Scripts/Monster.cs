@@ -14,7 +14,7 @@ public class Monster : MonoBehaviour
     public static Monster HoveredMonster { get; set; }
 
     [SerializeField]
-    TMPro.TextMeshProUGUI HealthText;
+    ChangeableStatUI _health;
 
     [SerializeField]
     TMPro.TextMeshProUGUI NameText;
@@ -28,31 +28,13 @@ public class Monster : MonoBehaviour
     [SerializeField]
     GameObject BaseCard;
 
-    [SerializeField]
-    float changeShowDuration = 1f;
-
-    bool showingHealthChange;
-    float showHealthTime;
-
-    private int _health;
     public int Health { 
-        get => _health; 
+        get => _health.Value; 
         set
         {
-            int newValue = Mathf.Max(0, value);
-            int change = newValue - _health;
-            _health = newValue;
-            if (change != 0)
-            {
-                HealthText.text = change.ToString();
-                showHealthTime = Time.timeSinceLevelLoad + changeShowDuration;
-                showingHealthChange = true;
-            } else
-            {
-                HealthText.text = newValue.ToString();
-            }
+            _health.Value = value;
 
-            if (_health == 0)
+            if (_health.Value == 0)
             {
                 deathHide = Time.timeSinceLevelLoad + DelayDeathHide;
             }
@@ -109,7 +91,7 @@ public class Monster : MonoBehaviour
             attacks[i].Reset();
         }
 
-        Health = startHealth;
+        _health.SetValueWithoutChange(startHealth);
         Defence = startDefence;
         Battle.OnChangePhase += Battle_OnChangePhase;
     }
@@ -166,6 +148,7 @@ public class Monster : MonoBehaviour
 
         for (int i = 0; i<sortedDice.Length; i++)
         {
+        Health = startHealth;
             bool usedDie = false;
             var value = sortedDice[i];
             for (int j = 0; j<attacks.Length; j++)
@@ -263,12 +246,6 @@ public class Monster : MonoBehaviour
 
     private void Update()
     {
-        if (showingHealthChange && Time.timeSinceLevelLoad > showHealthTime)
-        {
-            showingHealthChange = false;
-            HealthText.text = _health.ToString();
-        }
-
         if (!Alive && BaseCard.activeSelf && Time.timeSinceLevelLoad > deathHide)
         {
             BaseCard.SetActive(false);
