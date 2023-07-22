@@ -1042,8 +1042,8 @@ MonoBehaviour:
   - serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 0
+      time: 0.2980194
+      value: -0.0034179688
       inSlope: 2
       outSlope: 2
       tangentMode: 0
@@ -2484,7 +2484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d90dc89c22d83684cafe15c8720c8948, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trashBag: {fileID: 1594025988}
+  _trashed: {fileID: 1493012579}
 --- !u!114 &1493012578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4146,6 +4146,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1965221564}
   - component: {fileID: 1965221565}
+  - component: {fileID: 1965221566}
   m_Layer: 5
   m_Name: MonsterLane
   m_TagString: Untagged
@@ -4189,6 +4190,18 @@ MonoBehaviour:
   itemWidthFraction: 0.3
   itemSpacingFraction: 0.05
   center: 1
+--- !u!114 &1965221566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965221563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8fc9519807cc014080605dacca3110c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &2019285630 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2876283435569329555, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}

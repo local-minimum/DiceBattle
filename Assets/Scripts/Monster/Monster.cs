@@ -148,7 +148,6 @@ public class Monster : MonoBehaviour
 
         for (int i = 0; i<sortedDice.Length; i++)
         {
-        Health = startHealth;
             bool usedDie = false;
             var value = sortedDice[i];
             for (int j = 0; j<attacks.Length; j++)

@@ -56,6 +56,7 @@ public class DiceManager : MonoBehaviour
                     Battle.Phase = Battle.Phase.NextPhase();
                 }
                 break;
+            case BattlePhase.PlayerAttack:
             case BattlePhase.Cleanup:
                 ResetDice();
                 break;
