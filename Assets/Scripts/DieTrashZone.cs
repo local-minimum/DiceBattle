@@ -4,20 +4,18 @@ using UnityEngine;
 
 public class DieTrashZone : MonoBehaviour
 {
-    int _trashed;
+    [SerializeField]
+    ChangeableStatUI _trashed;
 
     public int Trashed
     {
-        get => _trashed;
+        get => _trashed.Value;
         set
         {
-            _trashed = value;
-            trashBag.text = Trashed.ToString();
+            _trashed.Value = value;
         }
     }
 
-    [SerializeField]
-    TMPro.TextMeshProUGUI trashBag;
 
     bool hovered = false;
 
@@ -25,7 +23,7 @@ public class DieTrashZone : MonoBehaviour
     {
         if (Die.DraggedDie != null)
         {
-            trashBag.text = (Trashed + 1).ToString();
+            _trashed.PreviewChange(1);
             hovered = true;
         }
     }
@@ -34,14 +32,14 @@ public class DieTrashZone : MonoBehaviour
     {
         if (hovered)
         {
-            trashBag.text = Trashed.ToString();
+            _trashed.EndPreview();
             hovered = false;
         }
     }
 
     private void OnEnable()
     {
-        trashBag.text = Trashed.ToString();
+        _trashed.SetValueWithoutChange(0);
         Die.OnDropDie += Die_OnDropDie;
     }
 

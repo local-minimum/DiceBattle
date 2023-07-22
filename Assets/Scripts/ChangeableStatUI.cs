@@ -87,6 +87,16 @@ public class ChangeableStatUI : MonoBehaviour
         StatText.text = _value.ToString();
     }
 
+    public void PreviewChange(int change)
+    {
+        StatText.text = (_value + change).ToString();
+    }
+
+    public void EndPreview()
+    {
+        StatText.text = _value.ToString();
+    }
+
     void HideChange()
     {
         AnimationTarget.gameObject.SetActive(false);

@@ -92,17 +92,22 @@ public class DiceManager : MonoBehaviour
 
     public void ResetDice()
     {
+        int toTrash = 0;
         for (int i = 0; i<dice.Length; i++)
         {
             if (dice[i].Rolled)
             {
-                diceTrash.Trashed++;
+                toTrash++;
             }
 
             dice[i].Clear();
             dice[i].NoDice();
         }
 
+        if (toTrash > 0)
+        {
+            diceTrash.Trashed += toTrash;
+        }
         rollToDie = null;
     }
 
