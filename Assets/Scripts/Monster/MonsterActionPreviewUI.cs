@@ -21,14 +21,15 @@ public class MonsterActionPreviewUI : MonoBehaviour
     TMPro.TextMeshProUGUI ValueText;
 
 
-    public void Sync(MonsterAction action)
+    public void Sync(MonsterAction action, int remainingAP)
     {
         Preview.sprite = action.Sprite;
         ValueText.text = action.Value.ToString();
 
         Tooltip.SetTooltip(action.Name);
 
-        if (action.CanBeUsed)
+
+        if (!action.IsOnCooldown && action.ActionPoints <= remainingAP)
         {
             CooldownCover.SetActive(false);
             return;

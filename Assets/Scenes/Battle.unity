@@ -2186,9 +2186,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49a5114e7a642614ebdb24857cbcda8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AutoPhases: 060000000200000005000000
+  AutoPhases: 0600000002000000
   WakeupPhase: 6
-  autophaseDelay: 0.2
+  autophaseDelay: 0.5
 --- !u!114 &1331660290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4630,6 +4630,18 @@ PrefabInstance:
     - target: {fileID: 2876283435569329552, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
       propertyPath: m_Name
       value: Monster Card
+      objectReference: {fileID: 0}
+    - target: {fileID: 2876283435569329554, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
+      propertyPath: BaseDefence
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2876283435569329554, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
+      propertyPath: startHealth
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2876283435569329554, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
+      propertyPath: _actionPointsPerTurn
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 2876283435569329554, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
       propertyPath: actionSettings.Array.size

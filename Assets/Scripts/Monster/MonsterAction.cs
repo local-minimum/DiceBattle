@@ -33,18 +33,27 @@ public class MonsterAction : MonoBehaviour
     }
 
     public bool IsAttack => settings.ActionType == ActionType.Attack;
+    public bool IsHeal => settings.ActionType == ActionType.Healing;
+    public bool IsDefence => settings.ActionType == ActionType.Defence;
 
-    public bool CanBeUsed => settings != null && cooldown >= settings.Cooldown && Value != 0;
+    public bool IsOnCooldown => settings == null || cooldown < settings.Cooldown; 
+    public bool CanBeUsed => settings != null && settings.ActionType != ActionType.Defence && !IsOnCooldown && Value != 0;
+
+    public int ActionPoints => settings.ActionPoints;
 
     public int Cooldown => Mathf.Max(0, settings.Cooldown - cooldown);
 
     public void Use()
     {
-        cooldown = 0;
+        cooldown = -1;
     }
 
     public void NewTurn()
     {
+        if (cooldown < 0)
+        {
+            cooldown = 0;
+        }
         cooldown++;
     }
 

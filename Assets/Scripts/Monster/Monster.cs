@@ -14,6 +14,23 @@ public class Monster : MonoBehaviour
     public static Monster HoveredMonster { get; set; }
 
     [SerializeField]
+    int _actionPointsPerTurn = 3;
+
+    [SerializeField]
+    TMPro.TextMeshProUGUI ActionPointsUI;
+
+    int _actionPoints;
+
+    public int ActionPoints {
+        get => _actionPoints;
+        set
+        {
+            _actionPoints = value;
+            ActionPointsUI.text = $"AP: {value}";
+        }
+    }
+
+    [SerializeField]
     ChangeableStatUI _health;
 
     [SerializeField]
@@ -50,7 +67,12 @@ public class Monster : MonoBehaviour
     TMPro.TextMeshProUGUI DefenceText;
 
     [SerializeField]
-    int startDefence;
+    int BaseDefence;
+
+    public int Defence
+    {
+        get => BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints).Sum(a => a.Value) : 0);
+    }
 
     [SerializeField]
     int xpReward;
@@ -98,11 +120,6 @@ public class Monster : MonoBehaviour
     }
 
     public int XpReward => xpReward;
-
-    int _baseDefence;
-    public int Defence { 
-        get => _baseDefence; 
-    }
 
     public string Name => NameText.text;
 
@@ -160,26 +177,35 @@ public class Monster : MonoBehaviour
             case BattlePhase.UseDice:
                 SlotDice();
                 break;
-            case BattlePhase.MonsterAttack:
-                Attack();
-                break;
         }
     }
 
     int diceHeld;
     int[] diceValues;
 
-    void Attack()
+    public bool CanDoAction => Alive && ActionPoints > 0 && actions.Any(a => a.CanBeUsed && a.ActionPoints <= ActionPoints);
+
+    public void DoAction()
     {
-        var attack = actions.Where(a => a.CanBeUsed).OrderByDescending(a => a.Value).FirstOrDefault();
-        if (attack == null)
+        var action = actions.Where(a => a.CanBeUsed && a.ActionPoints <= ActionPoints).OrderByDescending(a => ((float) a.Value) / a.ActionPoints).FirstOrDefault();
+        if (action == null)
         {
             OnReport?.Invoke(this, "Can not attack");
             return;
         }
 
-        OnAttack?.Invoke(this, attack);
-        attack.Use();
+        if (action.IsAttack)
+        {
+            OnAttack?.Invoke(this, action);
+        } else if (action.IsHeal)
+        {
+            OnReport?.Invoke(this, $"Uses {action.Name} with value {action.Value} to heal themselves");
+            Health += action.Value;
+        }
+
+        ActionPoints -= action.ActionPoints;
+        action.Use();
+
         SyncActionPreviews();
     }
 
@@ -222,6 +248,40 @@ public class Monster : MonoBehaviour
         StatusText.text = "Slotted dice / waiting on turn";
 
         SyncActionPreviews();
+
+        DefenceText.text = Defence.ToString();
+    }
+
+    public int ConsumeDefenceForAttack(int attack)
+    {
+        // TODO: This can be smarter so that they don't consume best defence first when not needed
+        var defences = actions
+            .Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints < ActionPoints)
+            .OrderByDescending(a => ((float)a.Value) / a.ActionPoints)
+            .ToArray();
+
+        int defence = BaseDefence;
+
+        for (int i = 0; i<defences.Length; i++)
+        {
+            var action = defences[i];
+
+            if (action.ActionPoints <= ActionPoints)
+            {
+                defence += action.Value;
+                ActionPoints -= action.ActionPoints;
+                action.Use();
+            }
+
+            if (defence >= attack) break;
+        }
+
+        if (defence > 0)
+        {
+            DefenceText.text = Defence.ToString();
+        }
+
+        return defence;
     }
 
     void RollDice()
@@ -275,6 +335,9 @@ public class Monster : MonoBehaviour
             action.NewTurn();
         }
         SyncActionPreviews();
+        ActionPoints = _actionPointsPerTurn;
+
+        DefenceText.text = Defence.ToString();
     }
 
     MonsterActionPreviewUI ActionPreview(int index)
@@ -289,12 +352,16 @@ public class Monster : MonoBehaviour
 
     void SyncActionPreviews()
     {
-        var sorted = actions.OrderBy(a => !a.CanBeUsed).ThenBy(a => a.Cooldown).ToArray();
+        var sorted = actions
+            .OrderBy(a => a.IsOnCooldown)
+            .ThenBy(a => a.IsOnCooldown || a.ActionPoints > ActionPoints ? a.Cooldown : -a.Value)
+            .ToArray();
+
         int idx = 0;
         for (; idx<sorted.Length; idx++)
         {
             var preview = ActionPreview(idx);
-            preview.Sync(sorted[idx]);
+            preview.Sync(sorted[idx], ActionPoints);
             preview.gameObject.SetActive(true);
         }
 
