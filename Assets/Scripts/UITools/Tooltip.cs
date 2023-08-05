@@ -17,10 +17,13 @@ public class Tooltip : MonoBehaviour
     [SerializeField, Range(0, 2)]
     float anchorYOffset = 0.5f;
 
+    bool syncRects = false;
+    TooltipedItem tooltipedItem;
+
     private void OnEnable()
     {
         HideTooltip();
-        TooltipedItem.OnTooltip += TooltipedItem_OnTooltip;        
+        TooltipedItem.OnTooltip += TooltipedItem_OnTooltip;
     }
 
     private void OnDisable()
@@ -49,22 +52,12 @@ public class Tooltip : MonoBehaviour
         {
             transform.SetAsLastSibling();
             TextUI.text = tooltip.Tooltip;
-
-            var canvas = GetComponentInParent<Canvas>();
-            var canvasSize = (canvas.transform as RectTransform).sizeDelta;
-            var corners = new Vector3[4];
-            (tooltip.transform as RectTransform).GetWorldCorners(corners);
-
-            bool above;
-            bool right;
-            transform.position = Anchor(canvasSize, corners, out above, out right);
-
-            var pivot = new Vector2(right ? 1 : 0, above ? -anchorYOffset : 1 + anchorYOffset);
-            var rootRT = Root.transform as RectTransform;
-            rootRT.pivot = pivot;
+            tooltipedItem = tooltip;
+            syncRects = true;
             Root.SetActive(true);
         } else
         {
+            syncRects = false;
             HideTooltip();
         }
     }
@@ -72,5 +65,40 @@ public class Tooltip : MonoBehaviour
     void HideTooltip()
     {
         Root.SetActive(false);
+    }
+
+    void AlignToolip()
+    {
+        var canvas = GetComponentInParent<Canvas>();
+        var canvasSize = (canvas.transform as RectTransform).sizeDelta;
+        var corners = new Vector3[4];
+        (tooltipedItem.transform as RectTransform).GetWorldCorners(corners);
+
+        bool above;
+        bool right;
+        transform.position = Anchor(canvasSize, corners, out above, out right);
+
+        var pivot = new Vector2(right ? 1 : 0, above ? -anchorYOffset : 1 + anchorYOffset);
+        var rootRT = Root.transform as RectTransform;
+
+        rootRT.pivot = pivot;
+    }
+
+    void SyncRects()
+    {
+        var textSize = TextUI.GetComponent<RectTransform>().sizeDelta;
+        var rootRT = Root.transform as RectTransform;
+        var rootSize = rootRT.sizeDelta;
+        rootSize.y = textSize.y + 20;
+        rootRT.sizeDelta = rootSize;
+    }
+
+    private void Update()
+    {
+        if (syncRects)
+        {
+            SyncRects();
+            AlignToolip();
+        }
     }
 }

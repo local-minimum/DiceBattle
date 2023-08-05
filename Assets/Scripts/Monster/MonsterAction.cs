@@ -2,10 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MonsterAction : MonoBehaviour
 {
     MonsterActionSetting settings;
+
+    [SerializeField]
+    Image actionSprite;
+
+    [SerializeField]
+    TMPro.TextMeshProUGUI titleUI;
+
+    [SerializeField]
+    TMPro.TextMeshProUGUI valueUI;
 
     int cooldown = 0;
 
@@ -30,6 +40,9 @@ public class MonsterAction : MonoBehaviour
     {
         this.settings = setting;
         diceValues = new int[setting.Slots.Length];
+        actionSprite.sprite = setting.Sprite;
+        titleUI.text = setting.Name;
+        valueUI.text = Value.ToString();
     }
 
     public bool IsAttack => settings.ActionType == ActionType.Attack;
@@ -65,6 +78,8 @@ public class MonsterAction : MonoBehaviour
 
             diceValues[i] = Mathf.Max(1, diceValues[i] - 1);
         }
+
+        valueUI.text = Value.ToString();
     }
 
     public bool TakeDie(int value)
@@ -98,6 +113,8 @@ public class MonsterAction : MonoBehaviour
         if (pos == -1) return false;
 
         diceValues[pos] = value;
+        valueUI.text = Value.ToString();
+
         return true;
     }
     public int SuggestDiceThrowCount()

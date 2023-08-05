@@ -104,6 +104,9 @@ public class Monster : MonoBehaviour
     [SerializeField]
     RectTransform actionsPreviewsRoot;
 
+    [SerializeField]
+    MonsterActionsManager actionsManager;
+
     List<MonsterActionPreviewUI> actionPreviews = new List<MonsterActionPreviewUI>();
 
     List<MonsterAction> actions = new List<MonsterAction>();
@@ -204,6 +207,7 @@ public class Monster : MonoBehaviour
         }
 
         ActionPoints -= action.ActionPoints;
+        actionsManager.ShowAction(action);
         action.Use();
 
         SyncActionPreviews();
@@ -270,6 +274,7 @@ public class Monster : MonoBehaviour
             {
                 defence += action.Value;
                 ActionPoints -= action.ActionPoints;
+                actionsManager.ShowAction(action);
                 action.Use();
             }
 
