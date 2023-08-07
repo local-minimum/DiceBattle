@@ -114,7 +114,7 @@ public class DiceManager : MonoBehaviour
     {
         for (int i = 0; i < dice.Length; i++)
         {
-            if (i < Mathf.Min(diceCount, GameProgress.DiceHandSize))
+            if (i < Mathf.Min(diceCount, GameProgress.RollSize))
             {
                 dice[i].HasDie();
             } else

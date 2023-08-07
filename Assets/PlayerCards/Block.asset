@@ -17,3 +17,5 @@ MonoBehaviour:
   Slots:
   - DefaultValue: 0
     Effect: 0
+  Sprite: {fileID: 0}
+  ShopCost: 50

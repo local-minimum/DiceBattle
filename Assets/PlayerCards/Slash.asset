@@ -18,3 +18,4 @@ MonoBehaviour:
   - DefaultValue: 0
     Effect: 0
   Sprite: {fileID: 21300000, guid: 0bf67b4360dc1cd4caa0338c55219e9e, type: 3}
+  ShopCost: 40

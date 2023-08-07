@@ -9,13 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59065e7c559151041a8614c46d456261, type: 3}
-  m_Name: Expose Spleen
+  m_Script: {fileID: 11500000, guid: 5654d9cc0a4efdd46b874d35d7ef7a68, type: 3}
+  m_Name: Health Potion 2
   m_EditorClassIdentifier: 
-  Name: Expose Spleen
-  ActionType: 1
-  Slots:
-  - DefaultValue: 4
-    Effect: 1
+  Name: Health Potion
+  RestoreFraction: 0.5
+  CostPerHealthUnit: 1.25
   Sprite: {fileID: 0}
-  ShopCost: 40

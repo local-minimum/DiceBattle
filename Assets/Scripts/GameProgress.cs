@@ -5,6 +5,45 @@ using UnityEngine.SceneManagement;
 
 public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress> 
 {
+    #region Max Health
+    [SerializeField, Tooltip("If negative, same as start health")]
+    int StartMaxHealth = -1;
+    int _maxHealth = -1;
+    int maxHealth
+    {
+        get
+        {
+            if (_maxHealth < 0)
+            {
+                if (StartMaxHealth < 0)
+                {
+                    _maxHealth = StartHealth;
+                } else
+                {
+                    _maxHealth = StartMaxHealth;
+                }
+            }
+            return _maxHealth;
+        }
+        set
+        {
+            _maxHealth = Mathf.Max(0, value);
+            if (health > _maxHealth)
+            {
+                health = _maxHealth;
+            }
+        }
+    }
+    public static int MaxHealth
+    {
+        get => instance.maxHealth;
+        set
+        {
+            instance.maxHealth = value;
+        }
+    }
+    #endregion
+
     #region Health
     [SerializeField]
     int StartHealth = 42;
@@ -20,7 +59,7 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
         }
         set
         {
-            _health = Mathf.Max(0, value);
+            _health = Mathf.Clamp(value, 0, maxHealth);
         }
     }
     public static int Health
@@ -62,34 +101,34 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     }
     #endregion
 
-    #region Dice Hand Size
+    #region Dice Roll Size
     [SerializeField]
-    int StartDiceHandSize = 3;
-    int _diceHandSize = -1;
-    int diceHandSize
+    int StartRollSize = 3;
+    int _rollSize = -1;
+    int rollSize
     {
         get
         {
-            if (_diceHandSize < 0)
+            if (_rollSize < 0)
             {
-                _diceHandSize = StartDiceHandSize;
+                _rollSize = StartRollSize;
             }
-            return _diceHandSize;
+            return _rollSize;
         }
 
         set
         {
-            _diceHandSize = Mathf.Clamp(value, 0, GameSettings.MaxDiceHand);
+            _rollSize = Mathf.Clamp(value, 0, GameSettings.MaxPlayerRollSize);
         }
     }
-    public static int DiceHandSize
+    public static int RollSize
     {
-        get => instance.diceHandSize;
+        get => instance.rollSize;
     }
-    public static bool CanIncreaseDiceHand => instance.diceHandSize < GameSettings.MaxDiceHand;
+    public static bool CanIncreaseDiceHand => instance.rollSize < GameSettings.MaxPlayerRollSize;
     public static void IncreaseDiceHand()
     {
-        instance.diceHandSize++;
+        instance.rollSize++;
     }
     #endregion
 
@@ -125,11 +164,7 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     }
     #endregion
 
-    private void Start()
-    {
-        DontDestroyOnLoad(gameObject);
-    }
-
+    #region Scenes
     private static string _nextScene = "XP-Shop";
     public static void NextScene()
     {
@@ -140,5 +175,11 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     public static void InvokeBattle()
     {
         SceneManager.LoadScene(_battleScene);
+    }
+    #endregion
+
+    private void Start()
+    {
+        DontDestroyOnLoad(gameObject);
     }
 }

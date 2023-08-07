@@ -21,4 +21,5 @@ public class ActionCardSetting : ScriptableObject
     public ActionType ActionType;
     public DiceSlot[] Slots;
     public Sprite Sprite;
+    public int ShopCost;
 }

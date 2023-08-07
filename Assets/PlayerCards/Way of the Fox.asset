@@ -21,3 +21,5 @@ MonoBehaviour:
     Effect: 0
   - DefaultValue: 3
     Effect: 0
+  Sprite: {fileID: 0}
+  ShopCost: 150

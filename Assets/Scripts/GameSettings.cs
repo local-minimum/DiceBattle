@@ -11,5 +11,7 @@ public static class GameSettings
     public static int MonsterDifficultyBase = 2;
     public static int MonsterDifficultyPerFight = 5;
 
-    public static int MaxDiceHand = 8;
+    public static int MaxPlayerRollSize = 8;
+
+    public static int MaxShowWares = 4;
 }
