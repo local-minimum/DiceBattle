@@ -16,10 +16,14 @@ public class BattlePhaser : MonoBehaviour
     bool autophase;
     float nextPhaseTime;
 
+    private void Start()
+    {
+        Battle.Phase = WakeupPhase;
+    }
+
     private void OnEnable()
     {
         Battle.OnChangePhase += Battle_OnChangePhase;
-        Battle.Phase = WakeupPhase;
 
         MonsterManager.OnWipe += MonsterManager_OnWipe;
     }
