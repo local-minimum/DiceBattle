@@ -22,6 +22,12 @@ public class ShopPlayerStats : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI CurrentXPUI;
 
+    [SerializeField]
+    TMPro.TextMeshProUGUI CurrentCardHandSize;
+
+    [SerializeField]
+    TMPro.TextMeshProUGUI MaxCardHandSize;
+
     public void UpdateStats()
     {
         CurrentHealthUI.text = GameProgress.Health.ToString();
@@ -33,6 +39,9 @@ public class ShopPlayerStats : MonoBehaviour
         CurrentDiceCountUI.text = GameProgress.Dice.ToString();
 
         CurrentXPUI.text = GameProgress.XP.ToString();
+
+        CurrentCardHandSize.text = GameProgress.CardHandSize.ToString();
+        MaxCardHandSize.text = GameSettings.MaxPlayerCardHandSize.ToString();
     }
 
     private void Start()

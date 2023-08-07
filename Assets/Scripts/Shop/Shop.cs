@@ -7,19 +7,19 @@ using UnityEngine;
 public class Shop : MonoBehaviour
 {
     [System.Serializable]
-    struct IncreaseRollSize
+    struct FixedIncreaseStatCost
     {
-        public int[] CostByRollSize;
+        public int[] CostBySize;
         public Sprite Sprite;
 
         public string Name;
 
-        public bool CanIncrease => CostByRollSize.Length > GameProgress.RollSize;
+        public bool CanIncrease(int currentSize) => CostBySize.Length > currentSize + 1;
 
-        public int Cost => CostByRollSize[GameProgress.RollSize];
+        public int Cost(int nextSize) => CostBySize[nextSize];
     }
-
-    enum ShopCardType { Dice, RollSize, Potion, NewCard, DestroyCard, None }
+    
+    enum ShopCardType { Dice, RollSize, Potion, NewCard, DestroyCard, HandSize, None }
 
     [SerializeField]
     ShopItemCard prefab;
@@ -43,9 +43,14 @@ public class Shop : MonoBehaviour
     NewDiceCard[] Dice;
 
     [SerializeField]
-    IncreaseRollSize increaseRollSize;
+    FixedIncreaseStatCost increaseRollSize;
     bool UsedIncreaseRollSize;
     int IncreaseRollSizePriority = 0;
+
+    [SerializeField]
+    FixedIncreaseStatCost increaseHandSize;
+    bool UsedIncreaseHandSize;
+    int IncreaseHandSizePriority = 0;
 
     List<int> AvailableDice;
     int DicePriority = 0;
@@ -84,7 +89,12 @@ public class Shop : MonoBehaviour
             total += dice + DicePriority;
         }
 
-        if (!UsedIncreaseRollSize && increaseRollSize.CanIncrease)
+        if (!UsedIncreaseRollSize && increaseRollSize.CanIncrease(GameProgress.RollSize))
+        {
+            total += 1 + IncreaseRollSizePriority;
+        }
+
+        if (!UsedIncreaseHandSize && increaseHandSize.CanIncrease(GameProgress.CardHandSize))
         {
             total += 1 + IncreaseRollSizePriority;
         }
@@ -110,7 +120,7 @@ public class Shop : MonoBehaviour
             value -= dice + DicePriority;
         }
 
-        if (!UsedIncreaseRollSize && increaseRollSize.CanIncrease)
+        if (!UsedIncreaseRollSize && increaseRollSize.CanIncrease(GameProgress.RollSize))
         {
             if (value < 1 + IncreaseRollSizePriority)
             {
@@ -118,6 +128,16 @@ public class Shop : MonoBehaviour
             }
 
             value -= 1 + IncreaseRollSizePriority;
+        }
+
+        if (!UsedIncreaseHandSize && increaseHandSize.CanIncrease(GameProgress.CardHandSize))
+        {
+            if (value < 1 + IncreaseHandSizePriority)
+            {
+                return ShopCardType.HandSize;
+            }
+
+            value -= 1 + IncreaseHandSizePriority;
         }
 
         return ShopCardType.None;
@@ -130,6 +150,7 @@ public class Shop : MonoBehaviour
         if (cardType != ShopCardType.Potion) PotionsPriority += OtherGroupsPriorityBonus;
         if (cardType != ShopCardType.Dice) DicePriority += OtherGroupsPriorityBonus;
         if (cardType != ShopCardType.RollSize) IncreaseRollSizePriority += OtherGroupsPriorityBonus;
+        if (cardType != ShopCardType.HandSize) IncreaseHandSizePriority += OtherGroupsPriorityBonus;
     }
 
     List<ShopItemCard> cards = new List<ShopItemCard>();
@@ -197,17 +218,34 @@ public class Shop : MonoBehaviour
                 );
                 break;
             case ShopCardType.RollSize:
-                var cost = increaseRollSize.Cost;
+                var rollCost = increaseRollSize.Cost(GameProgress.RollSize + 1);
                 UsedIncreaseRollSize = true;
                 card.Prepare(
                     increaseRollSize.Name,
                     "Increase number of dice that can be rolled",
                     increaseRollSize.Sprite,
-                    cost,
+                    rollCost,
                     delegate
                     {
                         GameProgress.IncreaseRollSize();
-                        GameProgress.XP -= cost;
+                        GameProgress.XP -= rollCost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
+                break;
+            case ShopCardType.HandSize:
+                var handCost = increaseHandSize.Cost(GameProgress.CardHandSize + 1);
+                UsedIncreaseHandSize = true;
+                card.Prepare(
+                    increaseHandSize.Name,
+                    "Increase number of cards in play per turn",
+                    increaseHandSize.Sprite,
+                    handCost,
+                    delegate
+                    {
+                        GameProgress.IncreaseCardHandSize();
+                        GameProgress.XP -= handCost;
                         ValidateCardCosts();
                         playerStats.UpdateStats();
                     }

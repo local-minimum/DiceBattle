@@ -5,6 +5,35 @@ using UnityEngine.SceneManagement;
 
 public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress> 
 {
+    #region Card Hand Size
+    int StartCardHandSize = 2;
+    int _cardHandSize = -1;
+    int cardHandSize
+    {
+        get
+        {
+            if (_cardHandSize < 0)
+            {
+                _cardHandSize = StartCardHandSize;
+            }
+            return _cardHandSize;
+        }
+
+        set
+        {
+            _cardHandSize = Mathf.Clamp(value, StartCardHandSize, GameSettings.MaxPlayerCardHandSize);
+        }
+    }
+    public static int CardHandSize
+    {
+        get => instance.cardHandSize;
+    }
+    public static void IncreaseCardHandSize()
+    {
+        instance.cardHandSize++;
+    }
+    #endregion
+
     #region Max Health
     [SerializeField, Tooltip("If negative, same as start health")]
     int StartMaxHealth = -1;

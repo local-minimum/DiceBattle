@@ -12,10 +12,7 @@ public class ActionCardGroup : MonoBehaviour
     int saveableActions = 0;
 
     List<ActionCard> actionCards = new List<ActionCard>();
-    IEnumerable<ActionCard> ActiveCards => actionCards.Where((c, i) => i < handSize && c.FacingUp);
-
-    [SerializeField]
-    int handSize = 2;
+    IEnumerable<ActionCard> ActiveCards => actionCards.Where((c, i) => i < GameProgress.CardHandSize && c.FacingUp);
 
     public int ActionPoints
     {
@@ -89,7 +86,7 @@ public class ActionCardGroup : MonoBehaviour
     void DrawHand()
     {
         var idx = 0;
-        foreach (var (cardId, cardSettings) in deck.Draw(handSize))
+        foreach (var (cardId, cardSettings) in deck.Draw(GameProgress.CardHandSize))
         {
             Debug.Log($"{idx}: {cardSettings.Name}");
             var card = GetCard(idx);
