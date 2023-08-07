@@ -3,9 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public delegate void MonstersWipeEvent();
+
 public class MonsterManager : MonoBehaviour
 {
+    public static event MonstersWipeEvent OnWipe;
+
     List<Monster> Monsters = new List<Monster>();
+
+    bool AnyAlive
+    {
+        get
+        {
+            return Monsters.Any(m => m.Alive);
+        }
+    }
 
     private void Awake()
     {
@@ -15,11 +27,21 @@ public class MonsterManager : MonoBehaviour
     private void OnEnable()
     {
         Battle.OnChangePhase += Battle_OnChangePhase;
+        Monster.OnDeath += Monster_OnDeath;
     }
 
     private void OnDisable()
     {
-        Battle.OnChangePhase -= Battle_OnChangePhase;    
+        Battle.OnChangePhase -= Battle_OnChangePhase;
+        Monster.OnDeath -= Monster_OnDeath;
+    }
+
+    private void Monster_OnDeath(Monster monster)
+    {
+        if (!AnyAlive)
+        {
+            OnWipe?.Invoke();
+        }
     }
 
     bool mayTriggerMonsterAction;

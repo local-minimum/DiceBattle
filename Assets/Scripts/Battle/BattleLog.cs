@@ -19,15 +19,24 @@ public class BattleLog : MonoBehaviour
         ActionCard.OnAction += ActionCard_OnAction;
         Monster.OnReport += Monster_OnReport;
         Monster.OnAttack += Monster_OnAttack;
+        MonsterManager.OnWipe += MonsterManager_OnWipe;
         PlayerCharacter.OnHealthChange += PlayerCharacter_OnHealthChange;
     }
+
 
     private void OnDisable()
     {
         ActionCard.OnAction -= ActionCard_OnAction;
         Monster.OnReport -= Monster_OnReport;
         Monster.OnAttack -= Monster_OnAttack;
+        MonsterManager.OnWipe -= MonsterManager_OnWipe;
         PlayerCharacter.OnHealthChange -= PlayerCharacter_OnHealthChange;
+    }
+
+    private void MonsterManager_OnWipe()
+    {
+        History.Enqueue("**All monsters have been vaquished**");
+        Publish();
     }
 
     private void PlayerCharacter_OnHealthChange(int newHealth, int delta)
@@ -59,23 +68,23 @@ public class BattleLog : MonoBehaviour
     {
         if (receiver == null)
         {
-            History.Enqueue($"Player applies {card.ItemName} with value {card.Value}");
+            History.Enqueue($"[Player] applies {card.ItemName} with value {card.Value}");
         } else if (card.Value <= 0)
         {
-            History.Enqueue($"Player performs {card.ItemName} in the air in front of {receiver.Name}");
+            History.Enqueue($"[Player] performs {card.ItemName} in the air in front of {receiver.Name}");
         } else
         {
             if (damage <= 0)
             {
-                History.Enqueue($"Player attacks {receiver.Name} with a {card.Value} points {card.ItemName} but fails to damage them");
+                History.Enqueue($"[Player] attacks {receiver.Name} with a {card.Value} points {card.ItemName} but fails to damage them");
             } else
             {
-                History.Enqueue($"Player attacks {receiver.Name} with a {card.Value} points {card.ItemName} causing {damage} damage");
+                History.Enqueue($"[Player] attacks {receiver.Name} with a {card.Value} points {card.ItemName} causing {damage} damage");
 
                 if (receiver.Health == 0)
                 {
-                    History.Enqueue($"{receiver.Name} dies");
-                    History.Enqueue($"Player gains {receiver.XpReward} XP");
+                    History.Enqueue($"[{receiver.Name}] dies");
+                    History.Enqueue($"[Player] gains {receiver.XpReward} XP");
                 }
             }
         }

@@ -19,8 +19,6 @@ public class DiceManager : MonoBehaviour
 
     public int diceCount = 20;
 
-    public int maxHandSize = 4;
-
     private void OnEnable()
     {
         diceBag.text = diceCount.ToString();
@@ -116,7 +114,7 @@ public class DiceManager : MonoBehaviour
     {
         for (int i = 0; i < dice.Length; i++)
         {
-            if (i < Mathf.Min(diceCount, maxHandSize))
+            if (i < Mathf.Min(diceCount, GameProgress.DiceHandSize))
             {
                 dice[i].HasDie();
             } else

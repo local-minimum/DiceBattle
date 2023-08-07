@@ -12,6 +12,7 @@ public enum BattlePhase
     PlayerAttack,
     MonsterAttack,
     Cleanup,
+    Outro,
 }
 
 public delegate void ChangeBattlePhaseEvent(BattlePhase phase);

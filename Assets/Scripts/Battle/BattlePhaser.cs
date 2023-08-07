@@ -20,11 +20,20 @@ public class BattlePhaser : MonoBehaviour
     {
         Battle.OnChangePhase += Battle_OnChangePhase;
         Battle.Phase = WakeupPhase;
+
+        MonsterManager.OnWipe += MonsterManager_OnWipe;
     }
+
 
     private void OnDisable()
     {
-        Battle.OnChangePhase -= Battle_OnChangePhase;    
+        Battle.OnChangePhase -= Battle_OnChangePhase;
+        MonsterManager.OnWipe -= MonsterManager_OnWipe;
+    }
+
+    private void MonsterManager_OnWipe()
+    {
+        Battle.Phase = BattlePhase.Outro;
     }
 
     private void Battle_OnChangePhase(BattlePhase phase)
@@ -33,6 +42,9 @@ public class BattlePhaser : MonoBehaviour
         {
             nextPhase = Time.timeSinceLevelLoad + autophaseDelay;
             autophase = true;
+        } else if (autophase)
+        {
+            autophase = false;
         }
     }
 
@@ -41,7 +53,14 @@ public class BattlePhaser : MonoBehaviour
         if (autophase && Time.timeSinceLevelLoad > nextPhase)
         {
             autophase = false;
-            Battle.Phase = Battle.Phase.NextPhase();
+
+            if (Battle.Phase == BattlePhase.Outro)
+            {
+                GameProgress.NextScene();
+            } else
+            {
+                Battle.Phase = Battle.Phase.NextPhase();
+            }
         }
     }
 }

@@ -5,11 +5,13 @@ using UnityEngine;
 
 public delegate void MonsterReportEvent(Monster monster, string report);
 public delegate void MonsterAttackEvent(Monster monster, MonsterAction attack);
+public delegate void MonsterDeathEvent(Monster monster);
 
 public class Monster : MonoBehaviour
 {
     public static event MonsterReportEvent OnReport;
     public static event MonsterAttackEvent OnAttack;
+    public static event MonsterDeathEvent OnDeath;
 
     public static Monster HoveredMonster { get; set; }
 
@@ -55,6 +57,7 @@ public class Monster : MonoBehaviour
             {
                 GameProgress.XP += XpReward;
                 deathHide = Time.timeSinceLevelLoad + DelayDeathHide;
+                OnDeath?.Invoke(this);
             }
         }
     }
@@ -259,6 +262,8 @@ public class Monster : MonoBehaviour
 
     public int ConsumeDefenceForAttack(int attack)
     {
+        if (attack <= 0) return 0;
+
         // TODO: This can be smarter so that they don't consume best defence first when not needed
         var defences = actions
             .Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints < ActionPoints)

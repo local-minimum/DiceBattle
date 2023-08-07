@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress> 
 {
@@ -61,6 +62,37 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     }
     #endregion
 
+    #region Dice Hand Size
+    [SerializeField]
+    int StartDiceHandSize = 3;
+    int _diceHandSize = -1;
+    int diceHandSize
+    {
+        get
+        {
+            if (_diceHandSize < 0)
+            {
+                _diceHandSize = StartDiceHandSize;
+            }
+            return _diceHandSize;
+        }
+
+        set
+        {
+            _diceHandSize = Mathf.Clamp(value, 0, GameSettings.MaxDiceHand);
+        }
+    }
+    public static int DiceHandSize
+    {
+        get => instance.diceHandSize;
+    }
+    public static bool CanIncreaseDiceHand => instance.diceHandSize < GameSettings.MaxDiceHand;
+    public static void IncreaseDiceHand()
+    {
+        instance.diceHandSize++;
+    }
+    #endregion
+
     #region XP
     int _xp = 0;
     public int xp
@@ -96,5 +128,17 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
+    }
+
+    private static string _nextScene = "XP-Shop";
+    public static void NextScene()
+    {
+        Debug.Log($"Next scene is {_nextScene}");
+        SceneManager.LoadScene(_nextScene);
+    }
+    private static string _battleScene = "Battle";
+    public static void InvokeBattle()
+    {
+        SceneManager.LoadScene(_battleScene);
     }
 }
