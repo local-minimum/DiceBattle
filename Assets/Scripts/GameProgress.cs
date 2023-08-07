@@ -195,7 +195,7 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
 
     #region Scenes
     private static string _nextScene = "XP-Shop";
-    public static void NextScene()
+    public static void ExitBattle()
     {
         Debug.Log($"Next scene is {_nextScene}");
         SceneManager.LoadScene(_nextScene);

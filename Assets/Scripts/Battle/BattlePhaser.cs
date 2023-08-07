@@ -57,7 +57,7 @@ public class BattlePhaser : MonoBehaviour
 
             if (Battle.Phase == BattlePhase.Outro)
             {
-                GameProgress.NextScene();
+                GameProgress.ExitBattle();
             } else
             {
                 Battle.Phase = Battle.Phase.NextPhase();
