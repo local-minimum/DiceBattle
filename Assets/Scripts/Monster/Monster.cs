@@ -274,6 +274,8 @@ public class Monster : MonoBehaviour
 
         for (int i = 0; i<defences.Length; i++)
         {
+            if (defence >= attack) break;
+
             var action = defences[i];
 
             if (action.ActionPoints <= ActionPoints)

@@ -218,6 +218,7 @@ RectTransform:
   m_Children:
   - {fileID: 1493903949}
   - {fileID: 289844378}
+  - {fileID: 1425907763}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -238,6 +239,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc5288ed0cb1c94ea48aaa0eff34097, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  prefab: {fileID: 376239287786892364, guid: bdecf909fccd181449c1f10afeb4c333, type: 3}
+  itemsRoot: {fileID: 1425907763}
+  playerStats: {fileID: 289844381}
   OtherGroupsPriorityBonus: 10
   Potions:
   - {fileID: 11400000, guid: 67e6a04eea22a784b931e999d19282fd, type: 2}
@@ -255,7 +259,7 @@ MonoBehaviour:
   increaseRollSize:
     CostByRollSize: 000000000a0000001400000028000000c800000020030000c40900001027000050c30000
     Sprite: {fileID: 0}
-    Name: Increase Roll Size
+    Name: Roll Size+
 --- !u!1 &150210936
 GameObject:
   m_ObjectHideFlags: 0
@@ -1334,6 +1338,58 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1407668429}
   m_CullTransparentMesh: 1
+--- !u!1 &1425907762
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1425907763}
+  - component: {fileID: 1425907764}
+  m_Layer: 5
+  m_Name: Items
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1425907763
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425907762}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 103559719}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.05, y: 0.25}
+  m_AnchorMax: {x: 0.95, y: 0.8}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1425907764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425907762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a19fe2a2e5217bd469dc975020ca57cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemWidthFraction: 0.2125
+  itemSpacingFraction: 0.05
+  center: 1
 --- !u!1 &1480527788
 GameObject:
   m_ObjectHideFlags: 0

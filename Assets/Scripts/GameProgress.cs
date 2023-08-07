@@ -126,7 +126,7 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
         get => instance.rollSize;
     }
     public static bool CanIncreaseDiceHand => instance.rollSize < GameSettings.MaxPlayerRollSize;
-    public static void IncreaseDiceHand()
+    public static void IncreaseRollSize()
     {
         instance.rollSize++;
     }
@@ -175,6 +175,11 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     public static void InvokeBattle()
     {
         SceneManager.LoadScene(_battleScene);
+    }
+    private static string _gameOverScene = "GameOver";
+    public static void InvokeGameOver()
+    {
+        SceneManager.LoadScene(_gameOverScene);
     }
     #endregion
 

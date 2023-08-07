@@ -22,7 +22,7 @@ public class ShopPlayerStats : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI CurrentXPUI;
 
-    private void Start()
+    public void UpdateStats()
     {
         CurrentHealthUI.text = GameProgress.Health.ToString();
         MaxHealthUI.text = GameProgress.MaxHealth.ToString();
@@ -33,5 +33,10 @@ public class ShopPlayerStats : MonoBehaviour
         CurrentDiceCountUI.text = GameProgress.Dice.ToString();
 
         CurrentXPUI.text = GameProgress.XP.ToString();
+    }
+
+    private void Start()
+    {
+        UpdateStats();
     }
 }

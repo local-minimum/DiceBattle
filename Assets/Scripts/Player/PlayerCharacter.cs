@@ -11,16 +11,30 @@ public class PlayerCharacter : MonoBehaviour
     [SerializeField]
     ChangeableStatUI _healthUI;
 
+    [SerializeField]
+    ActionCardGroup cardGroup;
+
+    bool showDeath;
+    [SerializeField]
+    float showDeathDelay = 0.5f;
+    float showDeathTime;
+
     public int Health {
         get => GameProgress.Health;
         set
         {
             GameProgress.Health = value;
-            _healthUI.Value = value;
+            _healthUI.Value = GameProgress.Health;
+
+            if (GameProgress.Health == 0)
+            {
+                showDeathTime = showDeathDelay + Time.timeSinceLevelLoad;
+                showDeath = true;
+            }
         }
     }
 
-    public int Defence => 0;
+    public int Defence => cardGroup.Defence;
 
     private void OnEnable()
     {
@@ -65,5 +79,10 @@ public class PlayerCharacter : MonoBehaviour
             OnHealthChange?.Invoke(change.Health, change.Delta);
         }
         healthChanges.Clear();
+
+        if (showDeath && Time.timeSinceLevelLoad > showDeathTime)
+        {
+            GameProgress.InvokeGameOver();
+        }
     }
 }

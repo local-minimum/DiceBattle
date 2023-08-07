@@ -162,6 +162,9 @@ public class ActionCard : MonoBehaviour
         if (phase == BattlePhase.Cleanup)
         {
             FacingUp = true;
+        } else if (phase == BattlePhase.PlayerAttack && actionType == ActionType.Attack && Value <= 0)
+        {
+            FacingUp = false;
         }
     }
 

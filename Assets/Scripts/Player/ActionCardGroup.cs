@@ -12,6 +12,7 @@ public class ActionCardGroup : MonoBehaviour
     int saveableActions = 0;
 
     List<ActionCard> actionCards = new List<ActionCard>();
+    IEnumerable<ActionCard> ActiveCards => actionCards.Where((c, i) => i < handSize && c.FacingUp);
 
     [SerializeField]
     int handSize = 2;
@@ -21,7 +22,8 @@ public class ActionCardGroup : MonoBehaviour
         get; private set;
     }
 
-    public int SlottablePositions => actionCards.Sum(c => c.OpenSlots);
+    public int SlottablePositions => ActiveCards.Sum(c => c.OpenSlots);
+    public int Defence => ActiveCards.Sum(c => c.Action == ActionType.Defence ? c.Value : 0);
 
     private void OnEnable()
     {
@@ -116,7 +118,7 @@ public class ActionCardGroup : MonoBehaviour
         for (int i = 0; i<actionCards.Count; i++)
         {
             var card = actionCards[i];
-            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action == ActionType.Attack)
+            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action == ActionType.Attack && card.Value > 0)
             {
                 anyInteractable = true;
                 card.Interactable = true;
@@ -126,7 +128,7 @@ public class ActionCardGroup : MonoBehaviour
             }
         }
 
-        if (!anyInteractable)
+        if (!anyInteractable && Battle.Phase == BattlePhase.PlayerAttack)
         {
             triggerTime = Time.timeSinceLevelLoad + triggerDelay;
             triggerNextPhase = true;
@@ -144,7 +146,10 @@ public class ActionCardGroup : MonoBehaviour
         if (triggerNextPhase && triggerTime > Time.timeSinceLevelLoad)
         {
             triggerNextPhase = false;
-            Battle.Phase = Battle.Phase.NextPhase();
+            if (Battle.Phase == BattlePhase.PlayerAttack)
+            {
+                Battle.Phase = Battle.Phase.NextPhase();
+            }
         }
     }
 }

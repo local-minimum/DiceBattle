@@ -17,11 +17,13 @@ public class DiceManager : MonoBehaviour
     [SerializeField]
     ActionCardGroup actionCardGroup;
 
-    public int diceCount = 20;
+    public int diceCount = -1;
 
     private void OnEnable()
     {
+        diceCount = GameProgress.Dice;
         diceBag.text = diceCount.ToString();
+        diceTrash.Trashed = 0;
 
         DieDropZone.OnRecycleDie += DieDropZone_OnRecycleDie;
         Battle.OnChangePhase += Battle_OnChangePhase;
@@ -34,15 +36,25 @@ public class DiceManager : MonoBehaviour
         DieDropZone.OnRecycleDie -= DieDropZone_OnRecycleDie;
     }
 
+    [SerializeField]
+    float nextPhaseDelay = 0.5f;
+    bool autoTriggerNextPhase;
+    float nextPhaseTime;
+
+
     private void Battle_OnChangePhase(BattlePhase phase)
     {
+        autoTriggerNextPhase = false;
+
         switch (phase)
         {
             case BattlePhase.SelectNumberOfDice:
                 PrepareDiceCountSelection();
                 if (diceCount == 0)
                 {
-                    Battle.Phase = Battle.Phase.NextPhase();
+                    Debug.Log("Player has no dice to roll, go to next phase");
+                    nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
+                    autoTriggerNextPhase = true;
                 }
                 break;
             case BattlePhase.RollDice:
@@ -51,7 +63,9 @@ public class DiceManager : MonoBehaviour
             case BattlePhase.UseDice:
                 if (!HasDiceThatCanBeSlotted())
                 {
-                    Battle.Phase = Battle.Phase.NextPhase();
+                    Debug.Log("Player has no dice to use, go to next phase");
+                    nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
+                    autoTriggerNextPhase = true;
                 }
                 break;
             case BattlePhase.PlayerAttack:
@@ -190,5 +204,14 @@ public class DiceManager : MonoBehaviour
         if (!HasRemainingRolledDice()) return false;
 
         return actionCardGroup.SlottablePositions > 0;
+    }
+
+    private void Update()
+    {
+        
+        if (autoTriggerNextPhase && Time.timeSinceLevelLoad > nextPhaseDelay)
+        {
+            Battle.Phase = Battle.Phase.NextPhase();
+        }
     }
 }

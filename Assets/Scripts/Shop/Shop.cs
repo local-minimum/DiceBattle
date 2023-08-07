@@ -22,6 +22,15 @@ public class Shop : MonoBehaviour
     enum ShopCardType { Dice, RollSize, Potion, NewCard, DestroyCard, None }
 
     [SerializeField]
+    ShopItemCard prefab;
+
+    [SerializeField]
+    Transform itemsRoot;
+
+    [SerializeField]
+    ShopPlayerStats playerStats;
+
+    [SerializeField]
     int OtherGroupsPriorityBonus = 3;
 
     [SerializeField]
@@ -123,24 +132,86 @@ public class Shop : MonoBehaviour
         if (cardType != ShopCardType.RollSize) IncreaseRollSizePriority += OtherGroupsPriorityBonus;
     }
 
-    void PickCardByType(ShopCardType cardType)
+    List<ShopItemCard> cards = new List<ShopItemCard>();
+
+    ShopItemCard GetCard(int index)
     {
+        if (index < cards.Count)
+        {
+            return cards[index];
+        }
+
+        var card = Instantiate(prefab, itemsRoot);
+        cards.Add(card);
+
+        return card;
+    }
+
+    void ValidateCardCosts()
+    {
+
+        for (int i = 0, l = cards.Count; i<l; i++)
+        {
+            cards[i].ValidateCost();
+        }
+    }
+
+    void PickCardByType(ShopCardType cardType, int index)
+    {
+        var card = GetCard(index);
+
         switch (cardType)
         {
             case ShopCardType.Potion:
-                var potionCard = Potions[AvailablePotions[0]];
+                var potion = Potions[AvailablePotions[0]];
                 AvailablePotions.RemoveAt(0);
-                Debug.Log($"{potionCard.Name}, {AvailablePotions.Count} remain");
+                card.Prepare(
+                    potion.Name,
+                    $"Heals: {potion.Amount}",
+                    potion.Sprite,
+                    potion.Cost,
+                    delegate
+                    {
+                        GameProgress.Health += potion.Amount;
+                        GameProgress.XP -= potion.Cost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
                 break;
             case ShopCardType.Dice:
-                var diceCard = Dice[AvailableDice[0]];
+                var dice = Dice[AvailableDice[0]];
                 AvailableDice.RemoveAt(0);
-                Debug.Log($"{diceCard.Name}, {AvailableDice.Count} remain");
+                card.Prepare(
+                    dice.Name,
+                    "Adds new dice",
+                    dice.Sprite,
+                    dice.Cost,
+                    delegate
+                    {
+                        GameProgress.Dice += dice.Dice;
+                        GameProgress.XP -= dice.Cost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
                 break;
             case ShopCardType.RollSize:
                 var cost = increaseRollSize.Cost;
                 UsedIncreaseRollSize = true;
-                Debug.Log($"{increaseRollSize.Name} for {cost}");
+                card.Prepare(
+                    increaseRollSize.Name,
+                    "Increase number of dice that can be rolled",
+                    increaseRollSize.Sprite,
+                    cost,
+                    delegate
+                    {
+                        GameProgress.IncreaseRollSize();
+                        GameProgress.XP -= cost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
                 break;
             default:
                 Debug.Log($"Don't know card type {cardType}");
@@ -154,12 +225,14 @@ public class Shop : MonoBehaviour
         {
             var cardType = GetCardType();
             AllocatePriorities(cardType);
-            PickCardByType(cardType);
+            PickCardByType(cardType, i);
         }
     }
 
     private void Start()
     {
+        cards.AddRange(itemsRoot.GetComponentsInChildren<ShopItemCard>(true));
+
         PrepareShopSeeding();
         SeedShop();
 

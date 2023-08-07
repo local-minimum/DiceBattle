@@ -14,7 +14,7 @@ public class BattlePhaser : MonoBehaviour
     float autophaseDelay = 0.2f;
 
     bool autophase;
-    float nextPhase;
+    float nextPhaseTime;
 
     private void OnEnable()
     {
@@ -38,9 +38,10 @@ public class BattlePhaser : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
+        Debug.Log($"{phase} ({AutoPhases.Contains(phase)})");
         if (AutoPhases.Contains(phase))
         {
-            nextPhase = Time.timeSinceLevelLoad + autophaseDelay;
+            nextPhaseTime = Time.timeSinceLevelLoad + autophaseDelay;
             autophase = true;
         } else if (autophase)
         {
@@ -50,7 +51,7 @@ public class BattlePhaser : MonoBehaviour
 
     private void Update()
     {
-        if (autophase && Time.timeSinceLevelLoad > nextPhase)
+        if (autophase && Time.timeSinceLevelLoad > nextPhaseTime)
         {
             autophase = false;
 
