@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine.UI;
 using UnityEngine;
 
-public delegate void ActionCardEvent(ActionCard card, Monster reciever);
+public delegate void ActionCardEvent(ActionCard card, Monster reciever, int damage);
 
 public enum UtilityType { Heal };
 
@@ -210,16 +210,24 @@ public class ActionCard : MonoBehaviour
         if (Interactable && actionType == ActionType.Attack && Monster.HoveredMonster != null)
         {
             FacingUp = false;
-            OnAction?.Invoke(this, Monster.HoveredMonster);
+            var defence = Monster.HoveredMonster?.ConsumeDefenceForAttack(Value) ?? 0;
+            var damage = Mathf.Max(0, Value - defence);
+            if (Monster.HoveredMonster != null) {
+                Monster.HoveredMonster.Health -= damage;
+            }
+
+            OnAction?.Invoke(this, Monster.HoveredMonster, damage);
         }
     }
 
     public void OnClick()
     {
+        /*
         if (Interactable && actionType != ActionType.Attack)
         {
             FacingUp = false;
             OnAction?.Invoke(this, null);
         }
+        */
     }
 }

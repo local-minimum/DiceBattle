@@ -53,6 +53,7 @@ public class Monster : MonoBehaviour
 
             if (_health.Value == 0)
             {
+                GameProgress.XP += XpReward;
                 deathHide = Time.timeSinceLevelLoad + DelayDeathHide;
             }
         }

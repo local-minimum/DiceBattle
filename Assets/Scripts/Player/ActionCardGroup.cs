@@ -40,7 +40,7 @@ public class ActionCardGroup : MonoBehaviour
         ActionCard.OnAction -= ActionCard_OnAction;
     }
 
-    private void ActionCard_OnAction(ActionCard card, Monster reciever)
+    private void ActionCard_OnAction(ActionCard card, Monster reciever, int damage)
     {
         ActionPoints -= card.ActionPoints;
         SyncCards();

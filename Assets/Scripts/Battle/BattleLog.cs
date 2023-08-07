@@ -55,7 +55,7 @@ public class BattleLog : MonoBehaviour
         Publish();
     }
 
-    private void ActionCard_OnAction(ActionCard card, Monster receiver)
+    private void ActionCard_OnAction(ActionCard card, Monster receiver, int damage)
     {
         if (receiver == null)
         {
@@ -65,14 +65,11 @@ public class BattleLog : MonoBehaviour
             History.Enqueue($"Player performs {card.ItemName} in the air in front of {receiver.Name}");
         } else
         {
-            var defence = receiver.ConsumeDefenceForAttack(card.Value);
-            var damage = card.Value - defence;
             if (damage <= 0)
             {
                 History.Enqueue($"Player attacks {receiver.Name} with a {card.Value} points {card.ItemName} but fails to damage them");
             } else
             {
-                receiver.Health -= damage;
                 History.Enqueue($"Player attacks {receiver.Name} with a {card.Value} points {card.ItemName} causing {damage} damage");
 
                 if (receiver.Health == 0)

@@ -9,16 +9,14 @@ public class PlayerCharacter : MonoBehaviour
     public static event HealthChangeEvent OnHealthChange;
 
     [SerializeField]
-    int startHealth = 42;
-
-    [SerializeField]
-    ChangeableStatUI _health;
+    ChangeableStatUI _healthUI;
 
     public int Health {
-        get => _health.Value;
+        get => GameProgress.Health;
         set
         {
-            _health.Value = value;
+            GameProgress.Health = value;
+            _healthUI.Value = value;
         }
     }
 
@@ -26,7 +24,7 @@ public class PlayerCharacter : MonoBehaviour
 
     private void OnEnable()
     {
-        _health.SetValueWithoutChange(startHealth);
+        _healthUI.SetValueWithoutChange(GameProgress.Health);
         Monster.OnAttack += Monster_OnAttack;
     }
 
