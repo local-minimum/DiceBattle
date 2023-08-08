@@ -264,6 +264,9 @@ MonoBehaviour:
     CostBySize: 000000000a00000064000000e803000030750000
     Sprite: {fileID: 0}
     Name: Hand Size+
+  MaxDestroyCards: 2
+  DestroySampleFromCheapest: 5
+  DestroyCostMultiplier: 3
 --- !u!1 &132723672
 GameObject:
   m_ObjectHideFlags: 0

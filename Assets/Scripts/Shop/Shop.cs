@@ -21,6 +21,9 @@ public class Shop : MonoBehaviour
     
     enum ShopCardType { Dice, RollSize, Potion, NewCard, DestroyCard, HandSize, None }
 
+    [SerializeField, Range(0, 3)]
+    float maxPrizeXPFactor = 1.25f;
+
     [SerializeField]
     ShopItemCard prefab;
 
@@ -45,32 +48,56 @@ public class Shop : MonoBehaviour
     [SerializeField]
     FixedIncreaseStatCost increaseRollSize;
     bool UsedIncreaseRollSize;
-    int IncreaseRollSizePriority = 0;
+    int RollSizePriority = 0;
 
     [SerializeField]
     FixedIncreaseStatCost increaseHandSize;
     bool UsedIncreaseHandSize;
-    int IncreaseHandSizePriority = 0;
+    int HandSizePriority = 0;
+
+    [SerializeField]
+    int MaxDestroyCards = 2;
+    [SerializeField]
+    int DestroySampleFromCheapest = 5;
+    [SerializeField, Range(0, 10)]
+    float DestroyCostMultiplier = 0.5f;
+    List<ActionCardSetting> DestructableCards;
+    int DestructablePriority = 0;
 
     List<int> AvailableDice;
     int DicePriority = 0;
 
     void PrepareShopSeeding()
     {
+        int maxPrize = Mathf.RoundToInt(maxPrizeXPFactor * GameProgress.XP);
+
         AvailablePotions = Enumerable
             .Range(0, Potions.Length)
+            .Where(idx => Potions[idx].Cost <= maxPrize)
             .Shuffle()
             .ToList();
         PotionsPriority = 0;
 
         AvailableDice = Enumerable
             .Range(0, Dice.Length)
+            .Where(idx => Dice[idx].Cost <= maxPrize)
             .Shuffle()
             .ToList();
         DicePriority = 0;
 
-        UsedIncreaseRollSize = false;
-        IncreaseRollSizePriority = 0;
+        DestructableCards = ActionDeck.instance.Cards
+            .Take(DestroySampleFromCheapest)
+            .Where(setting => Mathf.RoundToInt(DestroyCostMultiplier * setting.ShopCost) <= maxPrize)
+            .Shuffle()
+            .Take(MaxDestroyCards)
+            .ToList();
+        DestructablePriority = 0;
+
+        UsedIncreaseRollSize = increaseRollSize.Cost(GameProgress.RollSize + 1) > maxPrize;
+        RollSizePriority = 0;
+
+        UsedIncreaseHandSize = increaseHandSize.Cost(GameProgress.CardHandSize + 1) > maxPrize;
+        HandSizePriority = 0;
     }
 
     ShopCardType GetCardType()
@@ -91,12 +118,18 @@ public class Shop : MonoBehaviour
 
         if (!UsedIncreaseRollSize && increaseRollSize.CanIncrease(GameProgress.RollSize))
         {
-            total += 1 + IncreaseRollSizePriority;
+            total += 1 + RollSizePriority;
         }
 
         if (!UsedIncreaseHandSize && increaseHandSize.CanIncrease(GameProgress.CardHandSize))
         {
-            total += 1 + IncreaseRollSizePriority;
+            total += 1 + RollSizePriority;
+        }
+
+        int destructables = DestructableCards.Count;
+        if (destructables > 0)
+        {
+            total += destructables + DestructablePriority;
         }
 
         var value = Random.Range(0, total);
@@ -122,22 +155,31 @@ public class Shop : MonoBehaviour
 
         if (!UsedIncreaseRollSize && increaseRollSize.CanIncrease(GameProgress.RollSize))
         {
-            if (value < 1 + IncreaseRollSizePriority)
+            if (value < 1 + RollSizePriority)
             {
                 return ShopCardType.RollSize;
             }
 
-            value -= 1 + IncreaseRollSizePriority;
+            value -= 1 + RollSizePriority;
         }
 
         if (!UsedIncreaseHandSize && increaseHandSize.CanIncrease(GameProgress.CardHandSize))
         {
-            if (value < 1 + IncreaseHandSizePriority)
+            if (value < 1 + HandSizePriority)
             {
                 return ShopCardType.HandSize;
             }
 
-            value -= 1 + IncreaseHandSizePriority;
+            value -= 1 + HandSizePriority;
+        }
+
+        if (destructables > 0)
+        {
+            if (value < destructables + DestructablePriority)
+            {
+                return ShopCardType.DestroyCard;
+            }
+            value -= destructables + DestructablePriority;
         }
 
         return ShopCardType.None;
@@ -149,8 +191,9 @@ public class Shop : MonoBehaviour
 
         if (cardType != ShopCardType.Potion) PotionsPriority += OtherGroupsPriorityBonus;
         if (cardType != ShopCardType.Dice) DicePriority += OtherGroupsPriorityBonus;
-        if (cardType != ShopCardType.RollSize) IncreaseRollSizePriority += OtherGroupsPriorityBonus;
-        if (cardType != ShopCardType.HandSize) IncreaseHandSizePriority += OtherGroupsPriorityBonus;
+        if (cardType != ShopCardType.RollSize) RollSizePriority += OtherGroupsPriorityBonus;
+        if (cardType != ShopCardType.HandSize) HandSizePriority += OtherGroupsPriorityBonus;
+        if (cardType != ShopCardType.DestroyCard) DestructablePriority += OtherGroupsPriorityBonus;
     }
 
     List<ShopItemCard> cards = new List<ShopItemCard>();
@@ -251,8 +294,27 @@ public class Shop : MonoBehaviour
                     }
                 );
                 break;
+            case ShopCardType.DestroyCard:
+                var setting = DestructableCards[0];
+                DestructableCards.RemoveAt(0);
+                int destroyCost = Mathf.RoundToInt(DestroyCostMultiplier * setting.ShopCost);
+                card.Prepare(
+                    $"DESTROY: {setting.Name}",
+                    setting.Summary(),
+                    setting.Sprite,
+                    destroyCost,
+                    delegate
+                    {
+                        ActionDeck.instance.RemoveOneInstance(setting);
+                        GameProgress.XP -= destroyCost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
+                break;
             default:
                 Debug.Log($"Don't know card type {cardType}");
+                card.Flip();
                 break;
         }
     }

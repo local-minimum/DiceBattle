@@ -64,9 +64,6 @@ public class ActionCardGroup : MonoBehaviour
     [SerializeField]
     ActionCard CardPrefab;
 
-    [SerializeField]
-    ActionDeck deck;
-
     ActionCard GetCard(int idx)
     {
         if (idx >= actionCards.Count)
@@ -86,7 +83,7 @@ public class ActionCardGroup : MonoBehaviour
     void DrawHand()
     {
         var idx = 0;
-        foreach (var (cardId, cardSettings) in deck.Draw(GameProgress.CardHandSize))
+        foreach (var (cardId, cardSettings) in ActionDeck.instance.Draw(GameProgress.CardHandSize))
         {
             Debug.Log($"{idx}: {cardSettings.Name}");
             var card = GetCard(idx);

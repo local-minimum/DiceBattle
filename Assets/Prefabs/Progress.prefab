@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4869419191379595608}
   - component: {fileID: 4869419191379595609}
+  - component: {fileID: 1478346413725800353}
   m_Layer: 0
   m_Name: Progress
   m_TagString: Untagged
@@ -48,3 +49,27 @@ MonoBehaviour:
   StartHealth: 42
   StartDice: 10
   StartRollSize: 3
+--- !u!114 &1478346413725800353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4869419191379595610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5c621c4361fdf147bec371d09e05a1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Deck:
+  - {fileID: 11400000, guid: 2ac73cba1215d134e870788070e51b61, type: 2}
+  - {fileID: 11400000, guid: 079943638f4b86e4993aa1c4545e42d0, type: 2}
+  - {fileID: 11400000, guid: 87ccd3a66d23125419e70c3109b05c1f, type: 2}
+  - {fileID: 11400000, guid: 1369d9f77ae89ee4ba861d66fae677fa, type: 2}
+  - {fileID: 11400000, guid: b2dcaf856aea8e94baa4753abc353c18, type: 2}
+  - {fileID: 11400000, guid: b2dcaf856aea8e94baa4753abc353c18, type: 2}
+  - {fileID: 11400000, guid: 187ce6afc4593ba43b60a07860b4b432, type: 2}
+  - {fileID: 11400000, guid: 187ce6afc4593ba43b60a07860b4b432, type: 2}
+  - {fileID: 11400000, guid: 187ce6afc4593ba43b60a07860b4b432, type: 2}
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
