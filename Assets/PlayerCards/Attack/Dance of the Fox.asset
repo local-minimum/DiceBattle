@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 59065e7c559151041a8614c46d456261, type: 3}
-  m_Name: Brute Force
+  m_Name: Dance of the Fox
   m_EditorClassIdentifier: 
-  Name: Brute Force
+  Name: Dance of the Fox
   ActionType: 0
   Slots:
   - DefaultValue: 0
@@ -20,4 +20,4 @@ MonoBehaviour:
   - DefaultValue: 0
     Effect: 0
   Sprite: {fileID: 0}
-  ShopCost: 80
+  ShopCost: 150

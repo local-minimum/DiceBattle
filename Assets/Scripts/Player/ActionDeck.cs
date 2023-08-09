@@ -38,6 +38,7 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
 
     private void Start()
     {
+        DontDestroyOnLoad(gameObject);
         if (ReshuffleEachSceneLoad)
         {
             ResetDeck();
@@ -60,5 +61,11 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
         }
 
         Debug.LogWarning($"Could not find any [{setting.Name}] in player deck to remove");
+    }
+
+    public void AddCard(ActionCardSetting setting)
+    {
+        Deck.Add(setting);
+        ResetDeck();
     }
 }

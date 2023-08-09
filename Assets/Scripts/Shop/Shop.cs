@@ -21,6 +21,7 @@ public class Shop : MonoBehaviour
     
     enum ShopCardType { Dice, RollSize, Potion, NewCard, DestroyCard, HandSize, None }
 
+    [Header("- General Settings -")]
     [SerializeField, Range(0, 3)]
     float maxPrizeXPFactor = 1.25f;
 
@@ -36,12 +37,16 @@ public class Shop : MonoBehaviour
     [SerializeField]
     int OtherGroupsPriorityBonus = 3;
 
+    [Header("- Health Settings -")]
     [SerializeField]
     HealthPotion[] Potions;
+    [SerializeField, Range(1, 5)]
+    float NoHealthPotionBonus = 3;
 
     List<int> AvailablePotions;
     int PotionsPriority = 0;
 
+    [Header("- Dice Settings -")]
     [SerializeField]
     NewDiceCard[] Dice;
 
@@ -50,6 +55,7 @@ public class Shop : MonoBehaviour
     bool UsedIncreaseRollSize;
     int RollSizePriority = 0;
 
+    [Header("- Cards Settings -")]
     [SerializeField]
     FixedIncreaseStatCost increaseHandSize;
     bool UsedIncreaseHandSize;
@@ -64,6 +70,17 @@ public class Shop : MonoBehaviour
     List<ActionCardSetting> DestructableCards;
     int DestructablePriority = 0;
 
+    [SerializeField]
+    float NewCardMinCostFactor = 0.9f;
+    [SerializeField]
+    int NewCardPlayerCardsRefSample = 3;
+    [SerializeField, Range(0, 20)]
+    int NewCardsSampleCount = 10;
+    [SerializeField, Range(0, 10)]
+    int NewCardsMax = 6;
+    List<ActionCardSetting> NewCards;
+    int NewCardsPriority = 0;
+
     List<int> AvailableDice;
     int DicePriority = 0;
 
@@ -76,6 +93,7 @@ public class Shop : MonoBehaviour
             .Where(idx => Potions[idx].Cost <= maxPrize)
             .Shuffle()
             .ToList();
+        Debug.Log($"[Shop] {AvailablePotions.Count} Potions available");
         PotionsPriority = 0;
 
         AvailableDice = Enumerable
@@ -83,6 +101,7 @@ public class Shop : MonoBehaviour
             .Where(idx => Dice[idx].Cost <= maxPrize)
             .Shuffle()
             .ToList();
+        Debug.Log($"[Shop] {AvailableDice.Count} Dice available");
         DicePriority = 0;
 
         DestructableCards = ActionDeck.instance.Cards
@@ -91,23 +110,42 @@ public class Shop : MonoBehaviour
             .Shuffle()
             .Take(MaxDestroyCards)
             .ToList();
+        Debug.Log($"[Shop] {DestructableCards.Count} Destructable cards available");
         DestructablePriority = 0;
 
         UsedIncreaseRollSize = increaseRollSize.Cost(GameProgress.RollSize + 1) > maxPrize;
+        Debug.Log($"[Shop] Increase roll size {(UsedIncreaseHandSize ? "unavailable" : "available")}");
         RollSizePriority = 0;
 
         UsedIncreaseHandSize = increaseHandSize.Cost(GameProgress.CardHandSize + 1) > maxPrize;
+        Debug.Log($"[Shop] Increase hand size {(UsedIncreaseHandSize ? "unavailable" : "available")}");
         HandSizePriority = 0;
+
+        var playerCardsRefCards = ActionDeck.instance.Cards
+            .TakeLast(NewCardPlayerCardsRefSample)
+            .ToList();
+
+        var playerCardsRefCost = playerCardsRefCards.Sum(c => c.ShopCost) / playerCardsRefCards.Count;
+
+        NewCards = ShopDeck.instance
+            .Cards(Mathf.RoundToInt(NewCardMinCostFactor * playerCardsRefCost), GameProgress.XP)
+            .Take(NewCardsSampleCount)
+            .Shuffle()
+            .Take(NewCardsMax)
+            .ToList();
+        Debug.Log($"[Shop] {NewCards.Count} New cards available");
+        NewCardsPriority = 0;
     }
 
-    ShopCardType GetCardType()
+    ShopCardType GetCardType(bool noHealthPotion)
     {
         int total = 0;
 
         int potions = AvailablePotions.Count;
+        int CalibratedPotionsPriority = noHealthPotion ? Mathf.RoundToInt(NoHealthPotionBonus * PotionsPriority) : PotionsPriority;
         if (potions > 0)
         {
-            total += potions + PotionsPriority;
+            total += potions + CalibratedPotionsPriority;
         }
 
         int dice = AvailableDice.Count;
@@ -132,15 +170,21 @@ public class Shop : MonoBehaviour
             total += destructables + DestructablePriority;
         }
 
+        int newcards = NewCards.Count;
+        if (newcards > 0)
+        {
+            total += newcards + NewCardsPriority;
+        }
+
         var value = Random.Range(0, total);
 
         if (potions > 0)
         {
-            if (value < potions + PotionsPriority)
+            if (value < potions + CalibratedPotionsPriority)
             {
                 return ShopCardType.Potion;
             }
-            value -= potions + PotionsPriority;
+            value -= potions + CalibratedPotionsPriority;
         }
 
         if (dice > 0)
@@ -182,6 +226,16 @@ public class Shop : MonoBehaviour
             value -= destructables + DestructablePriority;
         }
 
+        if (newcards > 0)
+        {
+            if (value < newcards + NewCardsPriority)
+            {
+                return ShopCardType.NewCard;
+            }
+            value -= newcards + NewCardsPriority;
+        }
+
+        Debug.LogWarning($"Failed to select a new card type (Remaining random value is {value})");
         return ShopCardType.None;
     }
 
@@ -189,11 +243,52 @@ public class Shop : MonoBehaviour
     {
         if (cardType == ShopCardType.None) return;
 
-        if (cardType != ShopCardType.Potion) PotionsPriority += OtherGroupsPriorityBonus;
-        if (cardType != ShopCardType.Dice) DicePriority += OtherGroupsPriorityBonus;
-        if (cardType != ShopCardType.RollSize) RollSizePriority += OtherGroupsPriorityBonus;
-        if (cardType != ShopCardType.HandSize) HandSizePriority += OtherGroupsPriorityBonus;
-        if (cardType != ShopCardType.DestroyCard) DestructablePriority += OtherGroupsPriorityBonus;
+        if (cardType != ShopCardType.Potion)
+        {
+            PotionsPriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            PotionsPriority = 0;
+        }
+        if (cardType != ShopCardType.Dice)
+        {
+            DicePriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            DicePriority = 0;
+        }
+        if (cardType != ShopCardType.RollSize)
+        {
+            RollSizePriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            RollSizePriority = 0;
+        }
+        if (cardType != ShopCardType.HandSize)
+        {
+            HandSizePriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            HandSizePriority = 0;
+        }
+        if (cardType != ShopCardType.DestroyCard)
+        {
+            DestructablePriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            DestructablePriority = 0;
+        }
+        if (cardType != ShopCardType.NewCard)
+        {
+            NewCardsPriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            NewCardsPriority = 0;
+        }
+
+        Debug.Log(
+            $"[Shop] Priorities: Potions={PotionsPriority} Dice={DicePriority} Roll Size={RollSizePriority} Hand Size={HandSizePriority} Destroy Card={DestructablePriority} New Card={NewCardsPriority}"
+            );
     }
 
     List<ShopItemCard> cards = new List<ShopItemCard>();
@@ -213,7 +308,6 @@ public class Shop : MonoBehaviour
 
     void ValidateCardCosts()
     {
-
         for (int i = 0, l = cards.Count; i<l; i++)
         {
             cards[i].ValidateCost();
@@ -312,6 +406,24 @@ public class Shop : MonoBehaviour
                     }
                 );
                 break;
+            case ShopCardType.NewCard:
+                var newSetting = NewCards[0];
+                NewCards.RemoveAt(0);
+                card.Prepare(
+                    newSetting.Name,
+                    newSetting.Summary(),
+                    newSetting.Sprite,
+                    newSetting.ShopCost,
+                    delegate
+                    {
+                        ShopDeck.instance.RemoveOneInstance(newSetting);
+                        ActionDeck.instance.AddCard(newSetting);
+                        GameProgress.XP -= newSetting.ShopCost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
+                break;
             default:
                 Debug.Log($"Don't know card type {cardType}");
                 card.Flip();
@@ -321,9 +433,14 @@ public class Shop : MonoBehaviour
 
     void SeedShop()
     {
+        bool noHealthInShop = true;
         for (int i = 0; i < GameSettings.MaxShowWares; i++)
         {
-            var cardType = GetCardType();
+            var cardType = GetCardType(noHealthInShop);
+            if (cardType == ShopCardType.Potion)
+            {
+                noHealthInShop = false;
+            }
             AllocatePriorities(cardType);
             PickCardByType(cardType, i);
         }

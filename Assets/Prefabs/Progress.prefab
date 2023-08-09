@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4869419191379595608}
   - component: {fileID: 4869419191379595609}
   - component: {fileID: 1478346413725800353}
+  - component: {fileID: 990125083}
   m_Layer: 0
   m_Name: Progress
   m_TagString: Untagged
@@ -47,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StartMaxHealth: -1
   StartHealth: 42
-  StartDice: 10
+  StartDice: 15
   StartRollSize: 3
 --- !u!114 &1478346413725800353
 MonoBehaviour:
@@ -73,3 +74,38 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 187ce6afc4593ba43b60a07860b4b432, type: 2}
   - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
   - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
+  ReshuffleEachSceneLoad: 1
+--- !u!114 &990125083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4869419191379595610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7380468d5f230e948871bc4d0d5621fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Deck:
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
+  - {fileID: 11400000, guid: 9bd73e5de52566d4cbb0f03c0f6556e1, type: 2}
+  - {fileID: 11400000, guid: 2ac73cba1215d134e870788070e51b61, type: 2}
+  - {fileID: 11400000, guid: 2ac73cba1215d134e870788070e51b61, type: 2}
+  - {fileID: 11400000, guid: 079943638f4b86e4993aa1c4545e42d0, type: 2}
+  - {fileID: 11400000, guid: 079943638f4b86e4993aa1c4545e42d0, type: 2}
+  - {fileID: 11400000, guid: b4b654a66fdb2fe42bde5d1df9152821, type: 2}
+  - {fileID: 11400000, guid: b4b654a66fdb2fe42bde5d1df9152821, type: 2}
+  - {fileID: 11400000, guid: b4b654a66fdb2fe42bde5d1df9152821, type: 2}
+  - {fileID: 11400000, guid: 1369d9f77ae89ee4ba861d66fae677fa, type: 2}
+  - {fileID: 11400000, guid: 1369d9f77ae89ee4ba861d66fae677fa, type: 2}
+  - {fileID: 11400000, guid: 1369d9f77ae89ee4ba861d66fae677fa, type: 2}
+  - {fileID: 11400000, guid: f101cbcab94334b46a65848d0e68c99d, type: 2}
+  - {fileID: 11400000, guid: f101cbcab94334b46a65848d0e68c99d, type: 2}
+  - {fileID: 11400000, guid: f101cbcab94334b46a65848d0e68c99d, type: 2}
+  - {fileID: 11400000, guid: 638687aab1ee83344a98b57ae39c0ee0, type: 2}
+  - {fileID: 11400000, guid: 638687aab1ee83344a98b57ae39c0ee0, type: 2}
+  - {fileID: 11400000, guid: 638687aab1ee83344a98b57ae39c0ee0, type: 2}
+  - {fileID: 11400000, guid: 4a82479050287cb4bbfd21b491c304d8, type: 2}
+  - {fileID: 11400000, guid: 4a82479050287cb4bbfd21b491c304d8, type: 2}
+  - {fileID: 11400000, guid: 4a82479050287cb4bbfd21b491c304d8, type: 2}
