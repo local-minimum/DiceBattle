@@ -16,9 +16,6 @@ public class Monster : MonoBehaviour
     public static Monster HoveredMonster { get; set; }
 
     [SerializeField]
-    int _actionPointsPerTurn = 3;
-
-    [SerializeField]
     TMPro.TextMeshProUGUI ActionPointsUI;
 
     int _actionPoints;
@@ -42,16 +39,13 @@ public class Monster : MonoBehaviour
     TMPro.TextMeshProUGUI StatusText;
 
     [SerializeField]
-    int startHealth;
-
-    [SerializeField]
     GameObject BaseCard;
 
     public int Health { 
         get => _health.Value; 
         set
         {
-            _health.Value = value;
+            _health.Value = Mathf.Min(value, settings.MaxHealth);
 
             if (_health.Value == 0)
             {
@@ -70,31 +64,10 @@ public class Monster : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI DefenceText;
 
-    [SerializeField]
-    int BaseDefence;
-
     public int Defence
     {
-        get => BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints).Sum(a => a.Value) : 0);
+        get => settings.BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints).Sum(a => a.Value) : 0);
     }
-
-    [SerializeField]
-    int xpReward;
-
-    [SerializeField]
-    int startDice;
-
-    [SerializeField]
-    int minDicePerTurn = 1;
-
-    [SerializeField]
-    int maxDicePerTurn = 3;
-
-    [SerializeField]
-    AnimationCurve extraDiceProb;
-
-    [SerializeField]
-    MonsterActionSetting[] actionSettings;
 
     [SerializeField]
     MonsterAction actionPrefab;
@@ -126,22 +99,16 @@ public class Monster : MonoBehaviour
         return action;
     }
 
-    public int XpReward => xpReward;
+    public int XpReward => settings.XPReward;
 
-    public string Name => NameText.text;
+    public string Name => settings.Name;
 
     public bool Alive => Health > 0;
 
-    private void Awake()
-    {
-        actions.AddRange(actionsRoot.GetComponentsInChildren<MonsterAction>());
-        actionPreviews.AddRange(actionsPreviewsRoot.GetComponentsInChildren<MonsterActionPreviewUI>());        
-    }
+    MonsterSettings settings;
 
-    private void OnEnable()
+    void ConfigurateActions(MonsterActionSetting[] actionSettings)
     {
-        diceHeld = startDice;
-
         int idx = 0;
         for (; idx<actionSettings.Length; idx++)
         {
@@ -155,9 +122,30 @@ public class Monster : MonoBehaviour
         {
             actions[idx].gameObject.SetActive(false);
         }
+    }
 
-        _health.SetValueWithoutChange(startHealth);
+    public void Configure(MonsterSettings settings)
+    {
+        this.settings = settings;
+        NameText.text = settings.Name;
+        
+        _health.SetValueWithoutChange(settings.MaxHealth);
 
+        diceHeld = settings.Dice;
+
+        ConfigurateActions(settings.EquipActions().ToArray());
+    }
+
+    private void Awake()
+    {
+        actions.Clear();
+        actions.AddRange(actionsRoot.GetComponentsInChildren<MonsterAction>());
+        actionPreviews.Clear();
+        actionPreviews.AddRange(actionsPreviewsRoot.GetComponentsInChildren<MonsterActionPreviewUI>());        
+    }
+
+    private void OnEnable()
+    {
         Battle.OnChangePhase += Battle_OnChangePhase;
     }
 
@@ -270,7 +258,7 @@ public class Monster : MonoBehaviour
             .OrderByDescending(a => ((float)a.Value) / a.ActionPoints)
             .ToArray();
 
-        int defence = BaseDefence;
+        int defence = settings.BaseDefence;
 
         for (int i = 0; i<defences.Length; i++)
         {
@@ -321,15 +309,15 @@ public class Monster : MonoBehaviour
     void SelectNumberAndRollDice()
     {
         var diceCount = Mathf.Min(actions.Where(a => a.CanBeUsed).Sum(a => a.SuggestDiceThrowCount()), diceHeld);
-        var t = 1f - ((float)diceHeld - diceCount) / startDice;
+        var t = 1f - ((float)diceHeld - diceCount) / settings.Dice;
 
-        if (diceCount < diceHeld && Random.value < extraDiceProb.Evaluate(t))
+        if (diceCount < diceHeld && Random.value < settings.ExtraDiceProb.Evaluate(t))
         {
             Debug.Log("Extra dice");
             diceCount++;
         }
 
-        diceCount = Mathf.Min(diceHeld, Mathf.Clamp(diceCount, minDicePerTurn, maxDicePerTurn));
+        diceCount = Mathf.Min(diceHeld, Mathf.Clamp(diceCount, settings.MinDicePerTurn, settings.MaxDicePerTurn));
         diceHeld -= diceCount;
         diceValues = new int[diceCount];
 
@@ -348,7 +336,7 @@ public class Monster : MonoBehaviour
             action.NewTurn();
         }
         SyncActionPreviews();
-        ActionPoints = _actionPointsPerTurn;
+        ActionPoints = settings.ActionPointsPerTurn;
 
         DefenceText.text = Defence.ToString();
     }

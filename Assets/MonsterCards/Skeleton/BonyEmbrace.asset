@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Bony Embrace
   ActionPoints: 1
+  StartCooldown: 0
   Cooldown: 0
   ActionType: 0
   Slots:
   - DefaultValue: 0
     Effect: 0
   Sprite: {fileID: 0}
+  EquipCost: 0

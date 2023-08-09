@@ -21,3 +21,4 @@ MonoBehaviour:
   - DefaultValue: 2
     Effect: 0
   Sprite: {fileID: 0}
+  EquipCost: 1

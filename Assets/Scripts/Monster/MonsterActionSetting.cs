@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "MonsterAction", menuName = "Battle/MonsterActionSetting")]
+[CreateAssetMenu(fileName = "MonsterAction", menuName = "Battle/MonsterActionSettings")]
 public class MonsterActionSetting : ScriptableObject 
 {
     public string Name;
@@ -12,4 +12,5 @@ public class MonsterActionSetting : ScriptableObject
     public ActionType ActionType;
     public DiceSlot[] Slots;
     public Sprite Sprite;
+    public int EquipCost;
 }

@@ -26,9 +26,25 @@ public class HorizontalAlignByFraction : MonoBehaviour
         }
     }
 
+    int ActiveChildren
+    {
+        get
+        {
+            int n = 0;
+            for (int i = 0, l = transform.childCount; i<l; i++)
+            {
+                if (transform.GetChild(i).gameObject.activeSelf)
+                {
+                    n++;
+                }
+            }
+            return n;
+        }
+    }
     float TotalWidth(RectTransform rt)
     {
-        return rt.childCount * itemWidthFraction + (rt.childCount - 1) * itemSpacingFraction;
+        int children = ActiveChildren;
+        return children * itemWidthFraction + (children - 1) * itemSpacingFraction;
     }
 
     void Center(RectTransform rt)
@@ -37,6 +53,9 @@ public class HorizontalAlignByFraction : MonoBehaviour
         for (int i=0, l = rt.childCount; i<l; i++)
         {
             var child = rt.GetChild(i) as RectTransform;
+
+            if (!child.gameObject.activeSelf) continue;
+
             child.anchorMin = new Vector2(pos, 0f);
             child.anchorMax = new Vector2(pos + itemWidthFraction, 1f);
             pos += itemWidthFraction + itemSpacingFraction;
@@ -49,6 +68,9 @@ public class HorizontalAlignByFraction : MonoBehaviour
         for (int i=0, l = rt.childCount; i<l; i++)
         {
             var child = rt.GetChild(i) as RectTransform;
+
+            if (!child.gameObject.activeSelf) continue;
+
             child.anchorMin = new Vector2(pos, 0f);
             child.anchorMax = new Vector2(pos + itemWidthFraction, 1f);
             pos += itemWidthFraction + itemSpacingFraction;
