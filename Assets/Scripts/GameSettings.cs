@@ -10,7 +10,7 @@ public static class GameSettings
 
     public static int MonsterDifficultyBase = 2;
     public static int MonsterDifficultyPerFight = 2;
-    public static int MaxMonstersInFight = 3;
+    public static int MaxMonstersInFight = 5;
 
     public static int MaxPlayerRollSize = 8;
     public static int MaxPlayerCardHandSize = 4;

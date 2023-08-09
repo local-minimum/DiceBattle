@@ -16,10 +16,10 @@ public class Shop : MonoBehaviour
 
         public bool CanIncrease(int currentSize) => CostBySize.Length > currentSize + 1;
 
-        public int Cost(int nextSize) => CostBySize[nextSize];
+        public int Cost(int nextSize) => nextSize > CostBySize.Length ? int.MaxValue : CostBySize[nextSize];
     }
     
-    enum ShopCardType { Dice, RollSize, Potion, NewCard, DestroyCard, HandSize, None }
+    enum ShopCardType { Dice, RollSize, Potion, NewCard, DestroyCard, HandSize, BaseDefence, MaxHealth, None }
 
     [Header("- General Settings -")]
     [SerializeField, Range(0, 3)]
@@ -45,6 +45,17 @@ public class Shop : MonoBehaviour
 
     List<int> AvailablePotions;
     int PotionsPriority = 0;
+
+    [SerializeField]
+    FixedIncreaseStatCost increaseMaxHealth;
+    bool UsedIncreaseMaxHealth;
+    int MaxHealthPriority;
+
+    [Header("- Defence Settings -")]
+    [SerializeField]
+    FixedIncreaseStatCost increaseBaseDefence;
+    bool UsedIncreaseBaseDefence;
+    int BaseDefencePriority;
 
     [Header("- Dice Settings -")]
     [SerializeField]
@@ -121,6 +132,15 @@ public class Shop : MonoBehaviour
         Debug.Log($"[Shop] Increase hand size {(UsedIncreaseHandSize ? "unavailable" : "available")}");
         HandSizePriority = 0;
 
+        UsedIncreaseMaxHealth = increaseMaxHealth.Cost(GameProgress.IncreasedMaxHealth + 1) > maxPrize;
+        Debug.Log($"[Shop] Increase max health {(UsedIncreaseMaxHealth ? "unavailable" : "available")}");
+        MaxHealthPriority = 0;
+
+        UsedIncreaseBaseDefence = increaseBaseDefence.Cost(GameProgress.BaseDefence + 1) > maxPrize;
+        Debug.Log($"[Shop] Increase max health {(UsedIncreaseMaxHealth ? "unavailable" : "available")}");
+        BaseDefencePriority = 0;
+
+
         var playerCardsRefCards = ActionDeck.instance.Cards
             .TakeLast(NewCardPlayerCardsRefSample)
             .ToList();
@@ -161,7 +181,17 @@ public class Shop : MonoBehaviour
 
         if (!UsedIncreaseHandSize && increaseHandSize.CanIncrease(GameProgress.CardHandSize))
         {
-            total += 1 + RollSizePriority;
+            total += 1 + HandSizePriority;
+        }
+
+        if (!UsedIncreaseMaxHealth && increaseMaxHealth.CanIncrease(GameProgress.IncreasedMaxHealth))
+        {
+            total += 1 + MaxHealthPriority;
+        }
+
+        if (!UsedIncreaseBaseDefence && increaseBaseDefence.CanIncrease(GameProgress.BaseDefence))
+        {
+            total += 1 + BaseDefencePriority;
         }
 
         int destructables = DestructableCards.Count;
@@ -215,6 +245,26 @@ public class Shop : MonoBehaviour
             }
 
             value -= 1 + HandSizePriority;
+        }
+
+        if (!UsedIncreaseMaxHealth && increaseMaxHealth.CanIncrease(GameProgress.IncreasedMaxHealth))
+        {
+            if (value < 1 + MaxHealthPriority)
+            {
+                return ShopCardType.MaxHealth;
+            }
+
+            value -= 1 + MaxHealthPriority;
+        }
+
+        if (!UsedIncreaseBaseDefence && increaseBaseDefence.CanIncrease(GameProgress.BaseDefence))
+        {
+            if (value < 1 + BaseDefencePriority)
+            {
+                return ShopCardType.BaseDefence;
+            }
+
+            value -= 1 + BaseDefencePriority;
         }
 
         if (destructables > 0)
@@ -285,9 +335,24 @@ public class Shop : MonoBehaviour
         {
             NewCardsPriority = 0;
         }
+        if (cardType != ShopCardType.MaxHealth)
+        {
+            MaxHealthPriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            MaxHealthPriority = 0;
+        }
+        if (cardType != ShopCardType.BaseDefence)
+        {
+            BaseDefencePriority += OtherGroupsPriorityBonus;
+        } else
+        {
+            BaseDefencePriority = 0;
+        }
 
         Debug.Log(
             $"[Shop] Priorities: Potions={PotionsPriority} Dice={DicePriority} Roll Size={RollSizePriority} Hand Size={HandSizePriority} Destroy Card={DestructablePriority} New Card={NewCardsPriority}"
+            + $" Max Health={MaxHealthPriority} Base Defence={BaseDefencePriority}"
             );
     }
 
@@ -419,6 +484,38 @@ public class Shop : MonoBehaviour
                         ShopDeck.instance.RemoveOneInstance(newSetting);
                         ActionDeck.instance.AddCard(newSetting);
                         GameProgress.XP -= newSetting.ShopCost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
+                break;
+            case ShopCardType.MaxHealth:
+                var maxHealthCost = increaseMaxHealth.Cost(GameProgress.IncreasedMaxHealth + 1);
+                card.Prepare(
+                    increaseMaxHealth.Name,
+                    "Increase player max health",
+                    increaseMaxHealth.Sprite,
+                    maxHealthCost,
+                    delegate
+                    {
+                        GameProgress.IncreaseMaxHealth();
+                        GameProgress.XP -= maxHealthCost;
+                        ValidateCardCosts();
+                        playerStats.UpdateStats();
+                    }
+                );
+                break;
+            case ShopCardType.BaseDefence:
+                var baseDefenceCost = increaseBaseDefence.Cost(GameProgress.BaseDefence + 1);
+                card.Prepare(
+                    increaseBaseDefence.Name,
+                    "Increase player base defence",
+                    increaseBaseDefence.Sprite,
+                    baseDefenceCost,
+                    delegate
+                    {
+                        GameProgress.IncreaseBaseDefence();
+                        GameProgress.XP -= baseDefenceCost;
                         ValidateCardCosts();
                         playerStats.UpdateStats();
                     }

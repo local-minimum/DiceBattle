@@ -28,6 +28,9 @@ public class ShopPlayerStats : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI MaxCardHandSize;
 
+    [SerializeField]
+    TMPro.TextMeshProUGUI BaseDefenceUI;
+
     public void UpdateStats()
     {
         CurrentHealthUI.text = GameProgress.Health.ToString();
@@ -42,6 +45,8 @@ public class ShopPlayerStats : MonoBehaviour
 
         CurrentCardHandSize.text = GameProgress.CardHandSize.ToString();
         MaxCardHandSize.text = GameSettings.MaxPlayerCardHandSize.ToString();
+
+        BaseDefenceUI.text = GameProgress.BaseDefence.ToString();
     }
 
     private void Start()

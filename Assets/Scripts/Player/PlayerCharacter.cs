@@ -12,6 +12,9 @@ public class PlayerCharacter : MonoBehaviour
     ChangeableStatUI _healthUI;
 
     [SerializeField]
+    ChangeableStatUI _defenceUI;
+
+    [SerializeField]
     ActionCardGroup cardGroup;
 
     bool showDeath;
@@ -34,17 +37,41 @@ public class PlayerCharacter : MonoBehaviour
         }
     }
 
-    public int Defence => cardGroup.Defence;
+    public int Defence => GameProgress.BaseDefence + cardGroup.Defence;
+
+    private void Start()
+    {
+        _defenceUI.SetValueWithoutChange(Defence);
+        _healthUI.SetValueWithoutChange(GameProgress.Health);
+    }
 
     private void OnEnable()
     {
-        _healthUI.SetValueWithoutChange(GameProgress.Health);
         Monster.OnAttack += Monster_OnAttack;
+        Battle.OnChangePhase += Battle_OnChangePhase;
+        DieDropZone.OnChange += DieDropZone_OnChange;
     }
+
 
     private void OnDisable()
     {
         Monster.OnAttack -= Monster_OnAttack;
+        Battle.OnChangePhase -= Battle_OnChangePhase;
+        DieDropZone.OnChange -= DieDropZone_OnChange;
+    }
+
+    private void DieDropZone_OnChange(DieDropZone dropZone)
+    {
+        Debug.Log($"New defence is {Defence}");
+        _defenceUI.Value = Defence;
+    }
+
+    private void Battle_OnChangePhase(BattlePhase phase)
+    {
+        if (phase == BattlePhase.SelectNumberOfDice)
+        {
+            _defenceUI.Value = Defence;
+        }
     }
     
     private struct HealthChange

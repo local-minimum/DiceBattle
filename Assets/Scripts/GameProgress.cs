@@ -34,6 +34,36 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     }
     #endregion
 
+    #region Base Defence
+    [SerializeField, Range(0, 10)]
+    int StartBaseDefence = 0;
+    int _baseDefence = -1;
+    int baseDefence
+    {
+        get
+        {
+            if (_baseDefence < 0)
+            {
+                _baseDefence = StartBaseDefence;
+            }
+            return _baseDefence;
+        }
+
+        set
+        {
+            _baseDefence = Mathf.Max(0, value);
+        }
+    }
+    public static int BaseDefence
+    {
+        get => instance.baseDefence;
+    }
+    public static void IncreaseBaseDefence()
+    {
+        instance.baseDefence++;
+    }
+    #endregion
+
     #region Max Health
     [SerializeField, Tooltip("If negative, same as start health")]
     int StartMaxHealth = -1;
@@ -66,11 +96,12 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     public static int MaxHealth
     {
         get => instance.maxHealth;
-        set
-        {
-            instance.maxHealth = value;
-        }
     }
+    public static void IncreaseMaxHealth()
+    {
+        instance.maxHealth++;
+    }
+    public static int IncreasedMaxHealth => MaxHealth - instance.StartMaxHealth;
     #endregion
 
     #region Health

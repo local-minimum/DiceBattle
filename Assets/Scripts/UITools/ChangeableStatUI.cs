@@ -58,6 +58,7 @@ public class ChangeableStatUI : MonoBehaviour
         set
         {
             var diff = value - _value;
+            if (diff == 0) return;
 
             if (NaturalNumbers)
             {
@@ -66,17 +67,15 @@ public class ChangeableStatUI : MonoBehaviour
 
             _value += diff;
 
-            if (diff != 0) {
-                ChangeText.text = diff.ToString();
+            ChangeText.text = diff.ToString();
 
-                animStartTime = Time.timeSinceLevelLoad;
-                animEndTime = animStartTime + AnimationDuration;
-                animateChange = true;
+            animStartTime = Time.timeSinceLevelLoad;
+            animEndTime = animStartTime + AnimationDuration;
+            animateChange = true;
 
-                SyncAnmation(0);
+            SyncAnmation(0);
 
-                AnimationTarget.gameObject.SetActive(true);
-            }
+            AnimationTarget.gameObject.SetActive(true);
         }
     }
 
