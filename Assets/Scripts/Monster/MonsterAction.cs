@@ -17,7 +17,7 @@ public class MonsterAction : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI valueUI;
 
-    int cooldown = 0;
+    int cooldown = -2;
 
     int[] diceValues;
 
@@ -63,11 +63,19 @@ public class MonsterAction : MonoBehaviour
 
     public void NewTurn()
     {
+        if (cooldown == -2)
+        {
+            cooldown = settings.StartCooldown;
+        }
+
         if (cooldown < 0)
         {
             cooldown = 0;
+        } else
+        {
+            cooldown++;
         }
-        cooldown++;
+        Debug.Log($"[Monster Card] {Name} can be used in {Cooldown} turns");
     }
 
     public void DecayDice()

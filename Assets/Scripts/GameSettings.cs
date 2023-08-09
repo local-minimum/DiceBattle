@@ -14,6 +14,6 @@ public static class GameSettings
     public static int MaxPlayerRollSize = 8;
     public static int MaxPlayerCardHandSize = 4;
 
-    public static int MaxShowWares = 4;
+    public static int MaxShowWares = 5;
 
 }

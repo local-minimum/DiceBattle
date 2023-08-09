@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Thick Cartilage
   ActionPoints: 1
+  StartCooldown: 1
   Cooldown: 1
   ActionType: 1
   Slots:

@@ -16,6 +16,7 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
 
     public IEnumerable<KeyValuePair<int, ActionCardSetting>> Draw(int count)
     {
+        Debug.Log($"[Player Deck] Draw {count} ({DrawPile.Count} / {Deck.Count} remaining)");
         for (int i = 0; i<count; i++)
         {
             if (DrawPile.Count == 0)
@@ -33,6 +34,7 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
 
     void ResetDeck()
     {
+        Debug.Log($"[Player Deck] Shuffle ({DrawPile.Count} / {Deck.Count} used)");
         DrawPile = Enumerable.Range(0, Deck.Count).Shuffle().ToList();
     }
 
@@ -54,17 +56,18 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
             if (Deck[i] == setting)
             {
                 Deck.RemoveAt(i);
-                Debug.Log($"Removed card [{setting.name}] from player deck");
+                Debug.Log($"[Player Deck] Removing card [{setting.name}]");
                 ResetDeck();
                 return;
             }
         }
 
-        Debug.LogWarning($"Could not find any [{setting.Name}] in player deck to remove");
+        Debug.LogWarning($"[Player Deck] Could not find any [{setting.Name}] to remove");
     }
 
     public void AddCard(ActionCardSetting setting)
     {
+        Debug.Log($"[Player Deck] Adding [{setting.Name}]");
         Deck.Add(setting);
         ResetDeck();
     }

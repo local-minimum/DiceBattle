@@ -10,9 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5654d9cc0a4efdd46b874d35d7ef7a68, type: 3}
-  m_Name: Health Potion 2
+  m_Name: Minor Health Potion
   m_EditorClassIdentifier: 
-  Name: Health Potion
-  RestoreFraction: 0.5
-  CostPerHealthUnit: 1.25
-  Sprite: {fileID: 0}
+  Name: Minor Health Potion
+  RestoreFraction: 0.25
+  CostPerHealthUnit: 1.5

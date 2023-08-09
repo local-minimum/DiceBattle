@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Bone Broth
   ActionPoints: 2
-  Cooldown: 5
+  StartCooldown: 1
+  Cooldown: 4
   ActionType: 2
   Slots:
   - DefaultValue: 0

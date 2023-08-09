@@ -34,7 +34,7 @@ public class Shop : MonoBehaviour
     [SerializeField]
     ShopPlayerStats playerStats;
 
-    [SerializeField]
+    [SerializeField, Range(1, 10)]
     int OtherGroupsPriorityBonus = 3;
 
     [Header("- Health Settings -")]
