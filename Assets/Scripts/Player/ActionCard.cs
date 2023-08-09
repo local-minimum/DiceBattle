@@ -67,6 +67,18 @@ public class ActionCard : MonoBehaviour
     [SerializeField]
     Transform dropZonesParent;
 
+    [SerializeField]
+    Image ActionTypeUI;
+
+    [SerializeField]
+    Sprite AttackSprite;
+
+    [SerializeField]
+    Sprite DefenceSprite;
+
+    [SerializeField]
+    Sprite HealSprite;
+
     DieDropZone GetSlot(int idx)
     {
         if (idx < dropZones.Count) return dropZones[idx];
@@ -123,6 +135,23 @@ public class ActionCard : MonoBehaviour
         for (var l = dropZones.Count; idx<l; idx++)
         {
             dropZones[idx].gameObject.SetActive(false);
+        }
+
+        switch (settings.ActionType)
+        {
+            case ActionType.Attack:
+                ActionTypeUI.sprite = AttackSprite;
+                break;
+            case ActionType.Defence:
+                ActionTypeUI.sprite = DefenceSprite;
+                break;
+            case ActionType.Healing:
+                ActionTypeUI.sprite = HealSprite;
+                break;
+            default:
+                ActionTypeUI.sprite = null;
+                Debug.LogWarning($"[Action Card] {settings.Name} is of type {settings.ActionType}, don't know how to show that");
+                break;
         }
     }
 
