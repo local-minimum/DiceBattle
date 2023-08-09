@@ -134,6 +134,7 @@ public class Monster : MonoBehaviour
         diceHeld = settings.Dice;
 
         ConfigurateActions(settings.EquipActions().ToArray());
+        gameObject.SetActive(true);
     }
 
     private void Awake()
@@ -376,9 +377,9 @@ public class Monster : MonoBehaviour
 
     private void Update()
     {
-        if (!Alive && BaseCard.activeSelf && Time.timeSinceLevelLoad > deathHide)
+        if (!Alive && Time.timeSinceLevelLoad > deathHide)
         {
-            BaseCard.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 }

@@ -2965,8 +2965,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49a5114e7a642614ebdb24857cbcda8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AutoPhases: 060000000200000007000000
-  WakeupPhase: 6
   autophaseDelay: 0.5
 --- !u!114 &1331660290
 MonoBehaviour:

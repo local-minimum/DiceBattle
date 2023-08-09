@@ -45,7 +45,7 @@ public class MonsterManager : MonoBehaviour
     private void Awake()
     {
         Monsters.Clear();
-        Monsters.AddRange(GetComponentsInChildren<Monster>());
+        Monsters.AddRange(GetComponentsInChildren<Monster>(true));
         Monsters[0].Configure(MonsterSettings[0]);
     }
 

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Fetid Wraps
   ActionPoints: 2
-  StartCooldown: 0
+  StartCooldown: -1
   Cooldown: 1
   ActionType: 0
   Slots:
