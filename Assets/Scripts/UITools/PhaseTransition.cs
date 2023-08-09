@@ -30,7 +30,6 @@ public class PhaseTransition : MonoBehaviour
             if (TriggerPhase[i] == phase)
             {
                 StopAllCoroutines();
-                Debug.Log(phase);
                 StartCoroutine(EaseIn(YAnimation[i], TargetY[i]));
                 return;
             }

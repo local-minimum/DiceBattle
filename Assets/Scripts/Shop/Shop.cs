@@ -133,11 +133,11 @@ public class Shop : MonoBehaviour
         HandSizePriority = 0;
 
         UsedIncreaseMaxHealth = increaseMaxHealth.Cost(GameProgress.IncreasedMaxHealth + 1) > maxPrize;
-        Debug.Log($"[Shop] Increase max health {(UsedIncreaseMaxHealth ? "unavailable" : "available")}");
+        Debug.Log($"[Shop] Increase max health {(UsedIncreaseMaxHealth ? "unavailable" : "available")} (+{GameProgress.IncreasedMaxHealth + 1} costs {increaseMaxHealth.Cost(GameProgress.IncreasedMaxHealth + 1)})");
         MaxHealthPriority = 0;
 
         UsedIncreaseBaseDefence = increaseBaseDefence.Cost(GameProgress.BaseDefence + 1) > maxPrize;
-        Debug.Log($"[Shop] Increase max health {(UsedIncreaseMaxHealth ? "unavailable" : "available")}");
+        Debug.Log($"[Shop] Increase base defence {(UsedIncreaseMaxHealth ? "unavailable" : "available")}");
         BaseDefencePriority = 0;
 
 

@@ -29,7 +29,6 @@ public class DiceManager : MonoBehaviour
         Battle.OnChangePhase += Battle_OnChangePhase;
     }
 
-
     private void OnDisable()
     {
         Battle.OnChangePhase -= Battle_OnChangePhase;
@@ -209,7 +208,7 @@ public class DiceManager : MonoBehaviour
     private void Update()
     {
         
-        if (autoTriggerNextPhase && Time.timeSinceLevelLoad > nextPhaseDelay)
+        if (autoTriggerNextPhase && Time.timeSinceLevelLoad > nextPhaseTime)
         {
             Battle.Phase = Battle.Phase.NextPhase();
         }

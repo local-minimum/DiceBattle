@@ -20,5 +20,7 @@ MonoBehaviour:
   Slots:
   - DefaultValue: 0
     Effect: 0
+  - DefaultValue: 2
+    Effect: 1
   Sprite: {fileID: 0}
   EquipCost: 3

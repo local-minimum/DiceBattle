@@ -136,6 +136,7 @@ public class DieDropZone : MonoBehaviour
     private void OnEnable()
     {
         Die.OnDropDie += Die_OnDropDie;
+        Battle.OnBeginBattle += Battle_OnBeginBattle;
 
         OnChange?.Invoke(this);
     }
@@ -143,9 +144,15 @@ public class DieDropZone : MonoBehaviour
     private void OnDisable()
     {
         Die.OnDropDie -= Die_OnDropDie;
+        Battle.OnBeginBattle -= Battle_OnBeginBattle;
         Hovered = false;
     }
 
+
+    private void Battle_OnBeginBattle()
+    {
+        Clear();
+    }
 
     public void CleanUp()
     {

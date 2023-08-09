@@ -66,7 +66,7 @@ public class Monster : MonoBehaviour
 
     public int Defence
     {
-        get => settings.BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints).Sum(a => a.Value) : 0);
+        get => settings.BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints && a.Value > 0).Sum(a => a.Value) : 0);
     }
 
     [SerializeField]
@@ -182,7 +182,9 @@ public class Monster : MonoBehaviour
 
     public void DoAction()
     {
-        var action = actions.Where(a => a.CanBeUsed && a.ActionPoints <= ActionPoints).OrderByDescending(a => ((float) a.Value) / a.ActionPoints).FirstOrDefault();
+        var action = actions
+            .Where(a => a.CanBeUsed && a.ActionPoints <= ActionPoints && a.Value > 0)
+            .OrderByDescending(a => ((float) a.Value) / a.ActionPoints).FirstOrDefault();
         if (action == null)
         {
             OnReport?.Invoke(this, "Can not attack");
@@ -254,7 +256,7 @@ public class Monster : MonoBehaviour
 
         // TODO: This can be smarter so that they don't consume best defence first when not needed
         var defences = actions
-            .Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints < ActionPoints)
+            .Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints < ActionPoints && a.Value > 0)
             .OrderByDescending(a => ((float)a.Value) / a.ActionPoints)
             .ToArray();
 

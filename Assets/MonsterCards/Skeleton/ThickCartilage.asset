@@ -18,7 +18,9 @@ MonoBehaviour:
   Cooldown: 1
   ActionType: 1
   Slots:
-  - DefaultValue: 2
+  - DefaultValue: 0
     Effect: 0
+  - DefaultValue: 5
+    Effect: 1
   Sprite: {fileID: 0}
   EquipCost: 1

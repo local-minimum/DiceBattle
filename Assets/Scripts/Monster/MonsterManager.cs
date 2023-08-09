@@ -18,7 +18,10 @@ public class MonsterManager : MonoBehaviour
     [SerializeField]
     Monster MonsterPrefab;
 
-    [SerializeField, Range(0, 10)]
+    [SerializeField]
+    AnimationCurve probabilityByDifficulty;
+
+    [SerializeField, Range(0, 20)]
     int DifficultyCostPerMonster = 4;
 
     bool AnyAlive
@@ -48,14 +51,31 @@ public class MonsterManager : MonoBehaviour
 
     bool GetRandomMonster(int availableScore, out MonsterSettings monsterSettings)
     {
-        var options = this.MonsterSettings.Where(m => m.DifficultyScore <= availableScore).Shuffle().ToArray();
+        var options = this.MonsterSettings
+            .Where(m => m.DifficultyScore <= availableScore)
+            .OrderBy(m => m.DifficultyScore)
+            .ToArray();
         if (options.Length == 0)
         {
             monsterSettings = null;
             return false;
         }
 
-        monsterSettings = options[0];
+        var probabilities = options.Select(m => probabilityByDifficulty.Evaluate(((float)m.DifficultyScore) / availableScore)).ToArray();
+        var value =  Random.Range(0f, probabilities.Sum());
+
+        Debug.Log($"[Monster Manager] Selecting monster using {value} with probabilities {(string.Join(" | ", probabilities.Select((p, i) => $"{options[i].Name} {p}")))}");
+        monsterSettings = options[options.Length - 1];
+
+        for (int i = 0; i<probabilities.Length; i++)
+        {
+            if (value < probabilities[i])
+            {
+                monsterSettings = options[i];
+                break;
+            }
+            value -= probabilities[i];
+        }
         return true;
     }
 

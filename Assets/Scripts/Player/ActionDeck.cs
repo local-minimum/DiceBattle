@@ -10,7 +10,7 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
     List<ActionCardSetting> Deck = new List<ActionCardSetting>();
 
     [SerializeField]
-    bool ReshuffleEachSceneLoad = true;
+    bool ShuffleOnBattleStart = true;
 
     List<int> DrawPile = new List<int>();
 
@@ -21,7 +21,7 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
         {
             if (DrawPile.Count == 0)
             {
-                ResetDeck();
+                ShuffleDeck();
             }
 
             var cardId = DrawPile[0];
@@ -32,7 +32,7 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
         }
     }
 
-    void ResetDeck()
+    void ShuffleDeck()
     {
         Debug.Log($"[Player Deck] Shuffle ({DrawPile.Count} / {Deck.Count} used)");
         DrawPile = Enumerable.Range(0, Deck.Count).Shuffle().ToList();
@@ -41,9 +41,22 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
-        if (ReshuffleEachSceneLoad)
+    }
+
+    private void OnEnable()
+    {
+        Battle.OnBeginBattle += Battle_OnBeginBattle;
+    }
+
+    private void OnDisable()
+    {
+        Battle.OnBeginBattle -= Battle_OnBeginBattle;
+    }
+    private void Battle_OnBeginBattle()
+    {
+        if (ShuffleOnBattleStart)
         {
-            ResetDeck();
+            ShuffleDeck();
         }
     }
 
@@ -57,7 +70,7 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
             {
                 Deck.RemoveAt(i);
                 Debug.Log($"[Player Deck] Removing card [{setting.name}]");
-                ResetDeck();
+                ShuffleDeck();
                 return;
             }
         }
@@ -69,6 +82,6 @@ public class ActionDeck : DeCrawl.Primitives.FindingSingleton<ActionDeck>
     {
         Debug.Log($"[Player Deck] Adding [{setting.Name}]");
         Deck.Add(setting);
-        ResetDeck();
+        ShuffleDeck();
     }
 }

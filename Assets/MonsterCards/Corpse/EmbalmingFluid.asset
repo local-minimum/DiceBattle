@@ -10,17 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0993c7bea19b7044592c694bd89b3a26, type: 3}
-  m_Name: LaceratingMetacarpals
+  m_Name: EmbalmingFluid
   m_EditorClassIdentifier: 
-  Name: Lacerating Metacarpals
-  ActionPoints: 3
+  Name: Embalmbin Fluid
+  ActionPoints: 1
   StartCooldown: 0
-  Cooldown: 4
-  ActionType: 0
+  Cooldown: 2
+  ActionType: 2
   Slots:
   - DefaultValue: 0
     Effect: 0
-  - DefaultValue: 3
-    Effect: 0
   Sprite: {fileID: 0}
-  EquipCost: 2
+  EquipCost: 1

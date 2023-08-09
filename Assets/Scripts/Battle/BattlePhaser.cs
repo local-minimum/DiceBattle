@@ -4,11 +4,7 @@ using UnityEngine;
 
 public class BattlePhaser : MonoBehaviour
 {
-    [SerializeField]
-    List<BattlePhase> AutoPhases = new List<BattlePhase>();
-
-    [SerializeField]
-    BattlePhase WakeupPhase = BattlePhase.Cleanup;
+    List<BattlePhase> AutoPhases = new List<BattlePhase>() { BattlePhase.Intro, BattlePhase.RollDice, BattlePhase.None, BattlePhase.Outro, BattlePhase.Cleanup };
 
     [SerializeField]
     float autophaseDelay = 0.2f;
@@ -18,7 +14,7 @@ public class BattlePhaser : MonoBehaviour
 
     private void Start()
     {
-        Battle.Phase = WakeupPhase;
+        Battle.Phase = BattlePhase.Intro;
     }
 
     private void OnEnable()
@@ -42,7 +38,7 @@ public class BattlePhaser : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
-        Debug.Log($"{phase} ({AutoPhases.Contains(phase)})");
+        Debug.Log($"[Battle Phaser] {phase} ({AutoPhases.Contains(phase)})");
         if (AutoPhases.Contains(phase))
         {
             nextPhaseTime = Time.timeSinceLevelLoad + autophaseDelay;

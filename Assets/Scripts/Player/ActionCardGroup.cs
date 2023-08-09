@@ -30,13 +30,19 @@ public class ActionCardGroup : MonoBehaviour
 
         Battle.OnChangePhase += Battle_OnChangePhase;
         ActionCard.OnAction += ActionCard_OnAction;
+        Battle.OnBeginBattle += Battle_OnBeginBattle;
     }
-
 
     private void OnDisable()
     {
         Battle.OnChangePhase -= Battle_OnChangePhase;
+        Battle.OnBeginBattle -= Battle_OnBeginBattle;
         ActionCard.OnAction -= ActionCard_OnAction;
+    }
+
+    private void Battle_OnBeginBattle()
+    {
+        SlotedDiceCache.Clear();
     }
 
     private void ActionCard_OnAction(ActionCard card, Monster reciever, int damage)

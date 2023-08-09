@@ -239,7 +239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc5288ed0cb1c94ea48aaa0eff34097, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxPrizeXPFactor: 1.25
+  maxPrizeXPFactor: 1
   prefab: {fileID: 376239287786892364, guid: bdecf909fccd181449c1f10afeb4c333, type: 3}
   itemsRoot: {fileID: 1425907763}
   playerStats: {fileID: 289844381}
