@@ -64,10 +64,8 @@ public class Monster : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI DefenceText;
 
-    public int Defence
-    {
-        get => settings.BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints && a.Value > 0).Sum(a => a.Value) : 0);
-    }
+    public int BaseDefence => settings.BaseDefence;
+    public int Defence  => settings.BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints && a.Value > 0).Sum(a => a.Value) : 0);
 
     [SerializeField]
     MonsterAction actionPrefab;

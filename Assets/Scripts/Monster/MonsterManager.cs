@@ -6,7 +6,7 @@ using DeCrawl.Utils;
 
 public delegate void MonstersWipeEvent();
 
-public class MonsterManager : MonoBehaviour
+public class MonsterManager : DeCrawl.Primitives.FindingSingleton<MonsterManager> 
 {
     public static event MonstersWipeEvent OnWipe;
 
@@ -24,13 +24,19 @@ public class MonsterManager : MonoBehaviour
     [SerializeField, Range(0, 20)]
     int DifficultyCostPerMonster = 4;
 
+    IEnumerable<Monster> ActiveMonsters => Monsters.Where(m => m.gameObject.activeSelf);
+
     bool AnyAlive
     {
         get
         {
-            return Monsters.Any(m => m.Alive);
+            return ActiveMonsters.Any(m => m.Alive);
         }
     }
+
+    public bool CanHurtAnyMonster(ActionCard action) => action.Action == ActionType.Attack && ActiveMonsters.Any(m => m.Defence < action.Value);
+    public bool CanAffectAnyMonster(ActionCard action) => action.Action == ActionType.Attack && ActiveMonsters.Any(m => m.BaseDefence < action.Value);
+
 
     Monster GetMonster(int index)
     {
@@ -40,13 +46,6 @@ public class MonsterManager : MonoBehaviour
         Monsters.Add(monster);
 
         return monster;
-    }
-
-    private void Awake()
-    {
-        Monsters.Clear();
-        Monsters.AddRange(GetComponentsInChildren<Monster>(true));
-        Monsters[0].Configure(MonsterSettings[0]);
     }
 
     bool GetRandomMonster(int availableScore, out MonsterSettings monsterSettings)
@@ -106,6 +105,9 @@ public class MonsterManager : MonoBehaviour
 
     private void Start()
     {
+        Monsters.Clear();
+        Monsters.AddRange(GetComponentsInChildren<Monster>(true));
+
         ConfigureMonsters();
     }
 
@@ -147,7 +149,7 @@ public class MonsterManager : MonoBehaviour
 
     bool SelectMonsterToDoAction()
     {
-        var options = Monsters.Where(m => m.CanDoAction).ToArray();
+        var options = ActiveMonsters.Where(m => m.CanDoAction).ToArray();
         if (options.Length == 0)
         {
             return false;

@@ -10,6 +10,9 @@ public enum UtilityType { Heal };
 
 public class ActionCard : MonoBehaviour
 {
+    static readonly string UsedReason = "Used";
+    static readonly string TooWeakReason = "Too weak to cause damage";
+
     public static event ActionCardEvent OnAction;
 
     public static ActionCard DraggedCard { get; private set; }
@@ -44,6 +47,12 @@ public class ActionCard : MonoBehaviour
 
     [SerializeField]
     GameObject FaceDown;
+
+    [SerializeField]
+    TMPro.TextMeshProUGUI FaceDownTitle;
+
+    [SerializeField]
+    TMPro.TextMeshProUGUI FaceDownReason;
 
     public string ItemName => TitleUI.text;
     public bool Interactable { get; set; }
@@ -141,15 +150,19 @@ public class ActionCard : MonoBehaviour
         {
             case ActionType.Attack:
                 ActionTypeUI.sprite = AttackSprite;
+                FaceDownTitle.text = "Attack";
                 break;
             case ActionType.Defence:
                 ActionTypeUI.sprite = DefenceSprite;
+                FaceDownTitle.text = "Defence";
                 break;
             case ActionType.Healing:
                 ActionTypeUI.sprite = HealSprite;
+                FaceDownTitle.text = "Healing";
                 break;
             default:
                 ActionTypeUI.sprite = null;
+                FaceDownTitle.text = "Unknown";
                 Debug.LogWarning($"[Action Card] {settings.Name} is of type {settings.ActionType}, don't know how to show that");
                 break;
         }
@@ -168,6 +181,8 @@ public class ActionCard : MonoBehaviour
         {
             dz.Clear();
         }
+
+        FacingUp = true;
 
         SyncSlottedDice();
     }
@@ -191,9 +206,10 @@ public class ActionCard : MonoBehaviour
         if (phase == BattlePhase.Cleanup)
         {
             FacingUp = true;
-        } else if (phase == BattlePhase.PlayerAttack && actionType == ActionType.Attack && Value <= 0)
+        } else if (phase == BattlePhase.PlayerAttack && actionType == ActionType.Attack && (Value <= 0 || !MonsterManager.instance.CanAffectAnyMonster(this)))
         {
             FacingUp = false;
+            FaceDownReason.text = TooWeakReason;
         }
     }
 
@@ -242,6 +258,7 @@ public class ActionCard : MonoBehaviour
         if (Interactable && actionType == ActionType.Attack && Monster.HoveredMonster != null)
         {
             FacingUp = false;
+            FaceDownReason.text = UsedReason;
             var defence = Monster.HoveredMonster?.ConsumeDefenceForAttack(Value) ?? 0;
             var damage = Mathf.Max(0, Value - defence);
             if (Monster.HoveredMonster != null) {
@@ -258,6 +275,7 @@ public class ActionCard : MonoBehaviour
         if (Interactable && actionType != ActionType.Attack)
         {
             FacingUp = false;
+            FaceDownReason.text = UsedReason;
             OnAction?.Invoke(this, null);
         }
         */
