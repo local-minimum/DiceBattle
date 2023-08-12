@@ -371,7 +371,9 @@ MonoBehaviour:
   ActionCostUI: {fileID: 1739404090878020643}
   TitleUI: {fileID: 1739404092304976838}
   ImageUI: {fileID: 1739404091900406902}
-  HoverEffect: {fileID: 1739404092683865442}
+  InteractableColor: {r: 0.054901965, g: 0.39607847, b: 0.3647059, a: 1}
+  AutomaticColor: {r: 0.64627093, g: 0.9132063, b: 0.9716981, a: 1}
+  OutlineEffect: {fileID: 1739404092683865436}
   actionPointCost: 2
   FaceUp: {fileID: 1739404090927761452}
   FaceDown: {fileID: 1739404091312659274}

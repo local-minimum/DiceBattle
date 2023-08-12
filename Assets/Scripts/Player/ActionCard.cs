@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine;
 
 public delegate void ActionCardEvent(ActionCard card, Monster reciever, int damage);
+public delegate void FlipActionCardEvent(ActionCard card);
 
 public enum UtilityType { Heal };
 
@@ -14,6 +15,7 @@ public class ActionCard : MonoBehaviour
     static readonly string TooWeakReason = "Too weak to cause damage";
 
     public static event ActionCardEvent OnAction;
+    public static event FlipActionCardEvent OnFlipCard;
 
     public static ActionCard DraggedCard { get; private set; }
 
@@ -34,7 +36,13 @@ public class ActionCard : MonoBehaviour
     Image ImageUI;
 
     [SerializeField]
-    GameObject HoverEffect;
+    Color InteractableColor;
+
+    [SerializeField]
+    Color AutomaticColor;
+
+    [SerializeField]
+    Image OutlineEffect;
 
     [SerializeField, Range(0, 4)]
     int actionPointCost = 1;
@@ -55,20 +63,34 @@ public class ActionCard : MonoBehaviour
     TMPro.TextMeshProUGUI FaceDownReason;
 
     public string ItemName => TitleUI.text;
-    public bool Interactable { get; private set; }
+    public bool Interactable
+    {
+        get
+        {
+            switch (Battle.Phase)
+            {
+                case BattlePhase.PlayerAttack:
+                    return Action == ActionType.Attack && FacingUp;
+                default:
+                    return false;
+            }
+        }
+    } 
+
     public bool FacingUp {
         get => FaceUp.activeSelf;
         private set
         {
+            Debug.Log($"[{ItemName}] Facing Up set to {value}");
             FaceUp.SetActive(value);
             FaceDown.SetActive(!value);
+            if (!value && DraggedCard != this)
+            {
+                HideOutline();
+            }
             if (!value)
             {
-                Interactable = false;
-                HideHover();
-            } else
-            {
-                Interactable = Action == ActionType.Attack;
+                OnFlipCard?.Invoke(this);
             }
         }
     }
@@ -130,6 +152,13 @@ public class ActionCard : MonoBehaviour
         ImageUI.color = settings.Sprite == null ? Color.black : Color.white;
 
         actionType = settings.ActionType;
+        if (actionType != ActionType.Attack)
+        {
+            ShowOutline(AutomaticColor);
+        } else
+        {
+            HideOutline(true);
+        }
 
         int idx = 0;
         for (;idx<settings.Slots.Length; idx++)
@@ -176,6 +205,18 @@ public class ActionCard : MonoBehaviour
 
     public int OpenSlots => VisibleZones.Count(dz => dz.CanTakeDie);
 
+    public bool Autoslot(Die die)
+    {
+        foreach (var dz in VisibleZones.Where(dz => dz.CanTakeDie))
+        {
+            if (dz.TakeDie(die))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void Awake()
     {
         dropZones.AddRange(GetComponentsInChildren<DieDropZone>(true));
@@ -192,7 +233,6 @@ public class ActionCard : MonoBehaviour
 
     private void OnEnable()
     {
-        HideHover();
         SyncActionPointCost();
         DieDropZone.OnChange += DieDropZone_OnChange;
         Battle.OnChangePhase += Battle_OnChangePhase;
@@ -236,51 +276,72 @@ public class ActionCard : MonoBehaviour
 
     public void ShowHover()
     {
-        if (Interactable) HoverEffect.SetActive(true);
+        if (Interactable)
+        {
+            ShowOutline(InteractableColor);
+        }
+    }
+
+
+    void ShowOutline(Color color)
+    {
+        OutlineEffect.color = color;
+        OutlineEffect.gameObject.SetActive(true);
     }
 
     public void HideHover()
     {
-        if (DraggedCard != this) HoverEffect.SetActive(false);
+        if (Interactable) HideOutline();
+    }
+
+    void HideOutline(bool force = false)
+    {
+        if (force || DraggedCard != this)
+        {
+            OutlineEffect.gameObject.SetActive(false);
+        }
     }
 
     public void StartDrag()
     {
         if (Interactable && DraggedCard == null)
         {
-            HoverEffect.SetActive(true);
+            OutlineEffect.gameObject.SetActive(true);
             DraggedCard = this;
         }
     }
 
     public void EndDrag()
     {
+        DraggedCard?.HideOutline(true);
         DraggedCard = null;
-        HideHover();
+        HideOutline();
 
         if (Interactable && actionType == ActionType.Attack && Monster.HoveredMonster != null)
         {
-            FacingUp = false;
-            FaceDownReason.text = UsedReason;
-            var defence = Monster.HoveredMonster?.ConsumeDefenceForAttack(Value) ?? 0;
-            var damage = Mathf.Max(0, Value - defence);
-            if (Monster.HoveredMonster != null) {
-                Monster.HoveredMonster.Health -= damage;
-            }
-
-            OnAction?.Invoke(this, Monster.HoveredMonster, damage);
+            InvokeAttack(Monster.HoveredMonster);
         }
+    }
+    
+    void InvokeAttack(Monster target)
+    {
+        var defence = target?.ConsumeDefenceForAttack(Value) ?? 0;
+        var damage = Mathf.Max(0, Value - defence);
+        if (target != null) {
+            target.Health -= damage;
+        }
+
+        OnAction?.Invoke(this, target, damage);
+
+        FaceDownReason.text = UsedReason;
+        FacingUp = false;
     }
 
     public void OnClick()
     {
-        /*
-        if (Interactable && actionType != ActionType.Attack)
-        {
-            FacingUp = false;
-            FaceDownReason.text = UsedReason;
-            OnAction?.Invoke(this, null);
-        }
-        */
+        if (!Interactable) return;
+
+        var monster = MonsterManager.instance.FirstAffectableMonster(this);
+        InvokeAttack(monster);
     }
 }

@@ -4,10 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public delegate void DropDieEvent(Die die);
+public delegate void AutoslotDieEvent(Die die);
+public delegate void TrashDieEvent(Die die);
 
 public class Die : MonoBehaviour
 {
     public static event DropDieEvent OnDropDie;
+    public static event AutoslotDieEvent OnAutoslotDie;
+    public static event TrashDieEvent OnTrashDie;
 
     public static Die DraggedDie { get; private set; }
 
@@ -21,6 +25,9 @@ public class Die : MonoBehaviour
 
     [SerializeField]
     Image buttonImage;
+
+    [SerializeField, Range(0, 1)]
+    float doubleClickTime = 0.2f;
 
     private bool interactable;
     public bool Interactable { 
@@ -102,6 +109,10 @@ public class Die : MonoBehaviour
         {
             if (value)
             {
+                if (DraggedDie != null && DraggedDie != this)
+                {
+                    DraggedDie.Dragging = false;
+                }
                 DraggedDie = this;
                 buttonImage.raycastTarget = false;
             }
@@ -118,7 +129,7 @@ public class Die : MonoBehaviour
 
     public void OnDragStart()
     {
-        if (Battle.Phase != BattlePhase.UseDice) return;
+        if (Battle.Phase != BattlePhase.UseDice || !Interactable) return;
 
         if (RestoreParentTransform == null)
         {
@@ -138,10 +149,7 @@ public class Die : MonoBehaviour
         Dragging = false;
         OnDropDie?.Invoke(this);
 
-        if (!diceManager.HasDiceThatCanBeSlotted())
-        {
-            Battle.Phase = Battle.Phase.NextPhase();
-        }
+        diceManager.CheckIfMoreDiceCanBeSlotted();
     }
 
     public void OnDrag()
@@ -152,6 +160,7 @@ public class Die : MonoBehaviour
     }
     #endregion
 
+    float previousClick;
     public void OnClickDie()
     {
         if (Dragging || !Interactable) return;
@@ -161,7 +170,26 @@ public class Die : MonoBehaviour
             case BattlePhase.SelectNumberOfDice:
                 diceManager.SelectDieToRoll(this);
                 break;
+            case BattlePhase.UseDice:
+                var t = Time.timeSinceLevelLoad;
+                if (t - previousClick < doubleClickTime)
+                {
+                    AutoslotDie();
+                } else
+                {
+                    previousClick = t;
+                }
+                break;
         }
+    }
+
+    public void AutoslotDie()
+    {
+        if (!Interactable) return;
+
+        OnAutoslotDie?.Invoke(this);
+
+        diceManager.CheckIfMoreDiceCanBeSlotted();
     }
 
     public int Value { get; private set; }
@@ -190,6 +218,13 @@ public class Die : MonoBehaviour
     {
         transform.SetAsFirstSibling();
         Interactable = true;
+    }
+
+
+    public void TrashDie()
+    {
+        OnTrashDie?.Invoke(this);
+        NoDice();
     }
 
     private void OnDestroy()

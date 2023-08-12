@@ -51,7 +51,7 @@ public class DiceManager : MonoBehaviour
                 PrepareDiceCountSelection();
                 if (diceCount == 0)
                 {
-                    Debug.Log("Player has no dice to roll, go to next phase");
+                    Debug.Log("[Dice Manager] Player has no dice to roll, go to next phase");
                     nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
                     autoTriggerNextPhase = true;
                 }
@@ -62,7 +62,7 @@ public class DiceManager : MonoBehaviour
             case BattlePhase.UseDice:
                 if (!HasDiceThatCanBeSlotted())
                 {
-                    Debug.Log("Player has no dice to use, go to next phase");
+                    Debug.Log("[Dice Manager] Player has no dice to use, go to next phase");
                     nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
                     autoTriggerNextPhase = true;
                 }
@@ -198,6 +198,15 @@ public class DiceManager : MonoBehaviour
         return false;
     }
 
+    public void CheckIfMoreDiceCanBeSlotted()
+    {
+        if (!HasDiceThatCanBeSlotted())
+        {
+            autoTriggerNextPhase = true;
+            nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
+        }
+    }
+
     public bool HasDiceThatCanBeSlotted()
     {
         if (!HasRemainingRolledDice()) return false;
@@ -210,7 +219,11 @@ public class DiceManager : MonoBehaviour
         
         if (autoTriggerNextPhase && Time.timeSinceLevelLoad > nextPhaseTime)
         {
-            Battle.Phase = Battle.Phase.NextPhase();
+            autoTriggerNextPhase = false;
+            if (Battle.Phase == BattlePhase.UseDice || Battle.Phase == BattlePhase.SelectNumberOfDice)
+            {
+                Battle.Phase = Battle.Phase.NextPhase();
+            }
         }
     }
 }

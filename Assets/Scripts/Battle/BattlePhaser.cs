@@ -38,7 +38,7 @@ public class BattlePhaser : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
-        Debug.Log($"[Battle Phaser] {phase} ({AutoPhases.Contains(phase)})");
+        Debug.Log($"[Battle Phaser] New phase is <{phase}>; Automatically switch to next phase: {AutoPhases.Contains(phase)}");
         if (AutoPhases.Contains(phase))
         {
             nextPhaseTime = Time.timeSinceLevelLoad + autophaseDelay;

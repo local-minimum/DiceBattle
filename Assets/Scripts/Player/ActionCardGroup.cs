@@ -31,13 +31,31 @@ public class ActionCardGroup : MonoBehaviour
         Battle.OnChangePhase += Battle_OnChangePhase;
         ActionCard.OnAction += ActionCard_OnAction;
         Battle.OnBeginBattle += Battle_OnBeginBattle;
+        Die.OnAutoslotDie += Die_OnAutoslotDie;
+        ActionCard.OnFlipCard += ActionCard_OnFlipCard;
     }
+
 
     private void OnDisable()
     {
         Battle.OnChangePhase -= Battle_OnChangePhase;
         Battle.OnBeginBattle -= Battle_OnBeginBattle;
         ActionCard.OnAction -= ActionCard_OnAction;
+        ActionCard.OnFlipCard -= ActionCard_OnFlipCard;
+        Die.OnAutoslotDie -= Die_OnAutoslotDie;
+    }
+
+    private void Die_OnAutoslotDie(Die die)
+    {
+        foreach (var card in ActiveCards)
+        {
+            if (card.Autoslot(die))
+            {
+                return;
+            }
+        }
+
+        die.TrashDie();
     }
 
     private void Battle_OnBeginBattle()
@@ -48,6 +66,11 @@ public class ActionCardGroup : MonoBehaviour
     private void ActionCard_OnAction(ActionCard card, Monster reciever, int damage)
     {
         ActionPoints -= card.ActionPoints;
+        SyncCards();
+    }
+
+    private void ActionCard_OnFlipCard(ActionCard card)
+    {
         SyncCards();
     }
 
@@ -91,7 +114,7 @@ public class ActionCardGroup : MonoBehaviour
         var idx = 0;
         foreach (var (cardId, cardSettings) in ActionDeck.instance.Draw(GameProgress.CardHandSize))
         {
-            Debug.Log($"[Action Card Group] Drew card {idx} [{cardSettings.Name}]");
+            Debug.Log($"[Action Card Group] Drew card {idx} <{cardSettings.Name}>");
             var card = GetCard(idx);
 
             card.Store(ref SlotedDiceCache);
@@ -120,7 +143,7 @@ public class ActionCardGroup : MonoBehaviour
             var card = actionCards[i];
             if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action == ActionType.Attack && card.Interactable)
             {
-                Debug.Log($"[Action Card Group] [{card.ItemName}] is interactable");
+                Debug.Log($"[Action Card Group] [{card.ItemName}] is interactable {card.Interactable}");
                 anyInteractable = true;
             }
         }

@@ -41,11 +41,20 @@ public class DieTrashZone : MonoBehaviour
     {
         _trashed.SetValueWithoutChange(0);
         Die.OnDropDie += Die_OnDropDie;
+        Die.OnTrashDie += Die_OnTrashDie;
     }
+
 
     private void OnDisable()
     {
         Die.OnDropDie -= Die_OnDropDie;
+        Die.OnTrashDie -= Die_OnTrashDie;
+    }
+
+    private void Die_OnTrashDie(Die die)
+    {
+        Debug.Log("[Dice Trash] Trashed a die");
+        Trashed++;
     }
 
     private void Die_OnDropDie(Die die)

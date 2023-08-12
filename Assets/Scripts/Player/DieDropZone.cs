@@ -167,7 +167,13 @@ public class DieDropZone : MonoBehaviour
 
     private void Die_OnDropDie(Die die)
     {
-        if (!CanTakeDie || !Hovered || !die.Interactable) return;
+        if (!Hovered) return;
+        TakeDie(die);
+    }
+
+    public bool TakeDie(Die die)
+    {
+        if (!CanTakeDie || !die.Interactable) return false;
 
         if (holdsDie)
         {
@@ -178,7 +184,10 @@ public class DieDropZone : MonoBehaviour
         die.NoDice();
         holdsDie = true;
         CanTakeDie = false;
+
         OnChange?.Invoke(this);
+
+        return true;
     }
 
     int _value;
