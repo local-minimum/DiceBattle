@@ -73,6 +73,7 @@ public class ShopItemCard : MonoBehaviour
     {
         if (flipSideImage.activeSelf || cost > GameProgress.XP) return;
 
+        Debug.Log($"[Shop Item Card] Bought <{TitleUI.text}>");
         OnSelect?.Invoke();
         Flip();
     }
