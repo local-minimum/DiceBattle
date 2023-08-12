@@ -91,7 +91,7 @@ public class ActionCardGroup : MonoBehaviour
         var idx = 0;
         foreach (var (cardId, cardSettings) in ActionDeck.instance.Draw(GameProgress.CardHandSize))
         {
-            Debug.Log($"{idx}: {cardSettings.Name}");
+            Debug.Log($"[Action Card Group] Drew card {idx} [{cardSettings.Name}]");
             var card = GetCard(idx);
 
             card.Store(ref SlotedDiceCache);
@@ -118,13 +118,10 @@ public class ActionCardGroup : MonoBehaviour
         for (int i = 0; i<actionCards.Count; i++)
         {
             var card = actionCards[i];
-            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action == ActionType.Attack && card.Value > 0)
+            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action == ActionType.Attack && card.Interactable)
             {
+                Debug.Log($"[Action Card Group] [{card.ItemName}] is interactable");
                 anyInteractable = true;
-                card.Interactable = true;
-            } else
-            {
-                card.Interactable = false;
             }
         }
 

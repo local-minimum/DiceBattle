@@ -55,7 +55,7 @@ public class ActionCard : MonoBehaviour
     TMPro.TextMeshProUGUI FaceDownReason;
 
     public string ItemName => TitleUI.text;
-    public bool Interactable { get; set; }
+    public bool Interactable { get; private set; }
     public bool FacingUp {
         get => FaceUp.activeSelf;
         private set
@@ -66,6 +66,9 @@ public class ActionCard : MonoBehaviour
             {
                 Interactable = false;
                 HideHover();
+            } else
+            {
+                Interactable = Action == ActionType.Attack;
             }
         }
     }

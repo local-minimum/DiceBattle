@@ -314,7 +314,7 @@ public class Monster : MonoBehaviour
 
         if (diceCount < diceHeld && Random.value < settings.ExtraDiceProb.Evaluate(t))
         {
-            Debug.Log("Extra dice");
+            Debug.Log($"[{Name}] Extra dice");
             diceCount++;
         }
 

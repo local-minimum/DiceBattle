@@ -62,7 +62,7 @@ public class PlayerCharacter : MonoBehaviour
 
     private void DieDropZone_OnChange(DieDropZone dropZone)
     {
-        Debug.Log($"New defence is {Defence}");
+        Debug.Log($"[Player] New defence is {Defence}");
         _defenceUI.Value = Defence;
     }
 

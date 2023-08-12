@@ -46,7 +46,7 @@ public class PhaseTransition : MonoBehaviour
 
         var startPosition = rt.anchoredPosition;
 
-        Debug.Log($"Lerping Y from {startPosition.y} => {targetY}");
+        // Debug.Log($"Lerping Y from {startPosition.y} => {targetY}");
 
         while (progress < maxT)
         {

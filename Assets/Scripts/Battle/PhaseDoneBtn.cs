@@ -29,4 +29,12 @@ public class PhaseDoneBtn : MonoBehaviour
     {
         Battle.Phase = Battle.Phase.NextPhase();
     }
+
+    private void Update()
+    {
+        if (button.activeSelf && Input.GetKeyDown(KeyCode.Return))
+        {
+            OnClickButton();
+        }
+    }
 }
