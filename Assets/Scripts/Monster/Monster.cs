@@ -65,7 +65,7 @@ public class Monster : MonoBehaviour
     TMPro.TextMeshProUGUI DefenceText;
 
     public int BaseDefence => settings.BaseDefence;
-    public int Defence  => settings.BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints && a.Value > 0).Sum(a => a.Value) : 0);
+    public int Defence  => settings.BaseDefence + (ActionPoints > 0 ? actions.Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints <= ActionPoints).Sum(a => a.Value) : 0);
 
     [SerializeField]
     MonsterAction actionPrefab;
@@ -78,9 +78,6 @@ public class Monster : MonoBehaviour
 
     [SerializeField]
     RectTransform actionsPreviewsRoot;
-
-    [SerializeField]
-    MonsterActionsManager actionsManager;
 
     List<MonsterActionPreviewUI> actionPreviews = new List<MonsterActionPreviewUI>();
 
@@ -161,9 +158,11 @@ public class Monster : MonoBehaviour
         {
             case BattlePhase.Cleanup:
                 Cleanup();
+                HideAllActions();
                 break;
             case BattlePhase.SelectNumberOfDice:
                 SelectNumberAndRollDice();
+                ShowNonCooldownActions();
                 break;
             case BattlePhase.RollDice:
                 RollDice();
@@ -171,18 +170,21 @@ public class Monster : MonoBehaviour
             case BattlePhase.UseDice:
                 SlotDice();
                 break;
+            case BattlePhase.MonsterAttack:
+                RevealDiceValues();
+                break;
         }
     }
 
     int diceHeld;
     int[] diceValues;
 
-    public bool CanDoAction => Alive && ActionPoints > 0 && actions.Any(a => a.CanBeUsed && a.ActionPoints <= ActionPoints);
+    public bool CanDoAction => Alive && ActionPoints > 0 && actions.Any(a => a.IsUsableActiveAction && a.ActionPoints <= ActionPoints);
 
     public void DoAction()
     {
         var action = actions
-            .Where(a => a.CanBeUsed && a.ActionPoints <= ActionPoints && a.Value > 0)
+            .Where(a => a.IsUsableActiveAction && a.ActionPoints <= ActionPoints && a.Value > 0)
             .OrderByDescending(a => ((float) a.Value) / a.ActionPoints).FirstOrDefault();
         if (action == null)
         {
@@ -200,7 +202,6 @@ public class Monster : MonoBehaviour
         }
 
         ActionPoints -= action.ActionPoints;
-        actionsManager.ShowAction(action);
         action.Use();
 
         SyncActionPreviews();
@@ -209,7 +210,7 @@ public class Monster : MonoBehaviour
     void SlotDice()
     {
         var sortedDice = diceValues.OrderByDescending(v => v).ToArray();
-        var sortedActions = actions.OrderBy(a => !a.CanBeUsed).ThenBy(a => a.Cooldown).ToArray();
+        var sortedActions = actions.OrderBy(a => !a.IsUsableActiveAction).ThenBy(a => a.Cooldown).ToArray();
 
         for (int i = 0; i<sortedDice.Length; i++)
         {
@@ -218,10 +219,11 @@ public class Monster : MonoBehaviour
             for (int j = 0, l=sortedActions.Length; j<l; j++)
             {
                 var action = sortedActions[j];
-                if (!action.CanBeUsed) continue;
+                if (action.IsOnCooldown) continue;
 
                 if (action.TakeDie(value))
                 {
+                    Debug.Log($"[{Name}] <{action.Name}> took die with value {value}");
                     usedDie = true;
                     break;
                 }
@@ -232,12 +234,19 @@ public class Monster : MonoBehaviour
             for (int j = 0, l=sortedActions.Length; j<l; j++)
             {
                 var action = sortedActions[j];
-                if (action.CanBeUsed) continue;
+                if (!action.IsOnCooldown) continue;
 
                 if (action.TakeDie(value))
                 {
+                    usedDie = true;
+                    Debug.Log($"[{Name}] <{action.Name}> took die with value {value}");
                     break;
                 }
+            }
+
+            if (!usedDie)
+            {
+                Debug.LogWarning($"[{Name}] could not use a die with value {value}");
             }
 
         }
@@ -245,19 +254,26 @@ public class Monster : MonoBehaviour
         StatusText.text = "Slotted dice / waiting on turn";
 
         SyncActionPreviews();
-
-        DefenceText.text = Defence.ToString();
     }
 
     public int ConsumeDefenceForAttack(int attack)
     {
-        if (attack <= 0) return 0;
+        if (attack <= 0)
+        {
+            Debug.Log($"[{Name}] Disregards attack since it has no value");
+            return 0;
+        }
+
+        Debug.Log($"[{Name}] Preparing defence, having {ActionPoints} to spend");
+        Debug.Log($"[{Name}] Defence without cooldown {(string.Join(" | ", actions.Where(a => a.IsDefence && !a.IsOnCooldown).Select(a => $"[{a.Name}: {a.Value}/{a.ActionPoints}]")))}");
 
         // TODO: This can be smarter so that they don't consume best defence first when not needed
         var defences = actions
-            .Where(a => a.IsDefence && !a.IsOnCooldown && a.ActionPoints < ActionPoints && a.Value > 0)
+            .Where(a => a.IsDefence && a.ActionPoints <= ActionPoints && a.IsUsablePassiveAction)
             .OrderByDescending(a => ((float)a.Value) / a.ActionPoints)
             .ToArray();
+
+        Debug.Log($"[{Name}] Potential defences: {(string.Join("| ", defences.Select(d => d.Value)))}");
 
         int defence = settings.BaseDefence;
 
@@ -271,17 +287,13 @@ public class Monster : MonoBehaviour
             {
                 defence += action.Value;
                 ActionPoints -= action.ActionPoints;
-                actionsManager.ShowAction(action);
                 action.Use();
             }
 
             if (defence >= attack) break;
         }
 
-        if (defence > 0)
-        {
-            DefenceText.text = Defence.ToString();
-        }
+        Debug.Log($"[{Name}] Gathered a defence of {defence} ({BaseDefence})");
 
         return defence;
     }
@@ -303,18 +315,19 @@ public class Monster : MonoBehaviour
             text = $"Got dice: {diceText}";
         }
 
+        Debug.Log($"[{Name}] {text}");
         StatusText.text = text;
         OnReport?.Invoke(this, text);
     }
 
     void SelectNumberAndRollDice()
     {
-        var diceCount = Mathf.Min(actions.Where(a => a.CanBeUsed).Sum(a => a.SuggestDiceThrowCount()), diceHeld);
+        var diceCount = Mathf.Min(actions.Where(a => !a.IsOnCooldown).Sum(a => a.SuggestDiceThrowCount()), diceHeld);
         var t = 1f - ((float)diceHeld - diceCount) / settings.Dice;
 
         if (diceCount < diceHeld && Random.value < settings.ExtraDiceProb.Evaluate(t))
         {
-            Debug.Log($"[{Name}] Extra dice");
+            Debug.Log($"[{Name}] Wants to roll extra dice");
             diceCount++;
         }
 
@@ -323,8 +336,55 @@ public class Monster : MonoBehaviour
         diceValues = new int[diceCount];
 
         var text = $"Will roll {diceValues.Length} dice";
+        Debug.Log($"[{Name}] {text}");
         StatusText.text = text;
         OnReport?.Invoke(this, text);
+    }
+
+    void RevealDiceValues()
+    {
+        for (int i = 0,l=actions.Count; i<l; i++)
+        {
+            actions[i].RevealValue();
+        }
+    }
+
+    void ShowNonCooldownActions()
+    {
+        var parentSize = (transform as RectTransform).rect.size;
+        Vector2 offset = Vector2.left * parentSize.x * 0.3f; 
+
+        for (int i = 0, l = actions.Count; i<l; i++)
+        {
+            var action = actions[i];
+            if (!action.IsOnCooldown)
+            {
+                Debug.Log($"[{Name}] Could potentially use <{action.Name}> ({action.ValueRange} {action.ActionType})");
+                var rt = action.transform as RectTransform;
+                var childSize = rt.rect.size;
+                rt.SetParent(transform);
+                rt.offsetMax += offset;
+                rt.offsetMin += offset;
+
+                action.gameObject.SetActive(true);
+                offset.y -= childSize.y * 0.3f;
+                offset.x += childSize.x * 0.3f;
+            }
+        }
+    }
+
+    void HideAllActions()
+    {
+        for (int i = 0, l = actions.Count; i<l; i++)
+        {
+            var rt = actions[i].transform as RectTransform;
+            rt.SetParent(actionsRoot);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMax = Vector2.zero;
+            rt.offsetMin = Vector2.zero;
+            rt.gameObject.SetActive(false);
+        }
     }
 
     void Cleanup()
@@ -339,7 +399,7 @@ public class Monster : MonoBehaviour
         SyncActionPreviews();
         ActionPoints = settings.ActionPointsPerTurn;
 
-        DefenceText.text = Defence.ToString();
+        DefenceText.text = BaseDefence.ToString();
     }
 
     MonsterActionPreviewUI ActionPreview(int index)

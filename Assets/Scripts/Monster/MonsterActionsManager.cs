@@ -17,32 +17,49 @@ public class MonsterActionsManager : MonoBehaviour
     [SerializeField]
     float showDuration = 1;
 
-    Dictionary<float, MonsterAction> hideCache = new Dictionary<float, MonsterAction>();
+    Dictionary<float, MonsterAction> autohideCache = new Dictionary<float, MonsterAction>();
 
-    public void ShowAction(MonsterAction action)
+    void ShowAction(MonsterAction action)
     {
+        action.RevealValue();
+
         action.transform.SetParent(RT);
         action.transform.SetAsLastSibling();
         action.gameObject.SetActive(true);
-        hideCache.Add(Time.timeSinceLevelLoad + showDuration, action);
+        autohideCache.Add(Time.timeSinceLevelLoad + showDuration, action);
     }
 
-    public void HideAction(MonsterAction action)
+    void HideAction(MonsterAction action)
     {
         action.gameObject.SetActive(false);
         action.transform.SetParent(MonsterActionsRoot);
     }
 
+    private void OnEnable()
+    {
+        MonsterAction.OnUse += MonsterAction_OnUse;
+    }
+
+    private void OnDisable()
+    {
+        MonsterAction.OnUse -= MonsterAction_OnUse;    
+    }
+
+    private void MonsterAction_OnUse(MonsterAction action)
+    {
+        ShowAction(action);
+    }
+
     private void Update()
     {
-        var times = hideCache.Keys.ToArray();
+        var times = autohideCache.Keys.ToArray();
         for(int i = 0; i < times.Length; i++)
         {
             var t = times[i];
             if (Time.timeSinceLevelLoad > t)
             {
-                HideAction(hideCache[t]);
-                hideCache.Remove(t);
+                HideAction(autohideCache[t]);
+                autohideCache.Remove(t);
             }
         }
     }

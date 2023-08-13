@@ -4,8 +4,12 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
+public delegate void UseMonsterActionEvent(MonsterAction action);
+
 public class MonsterAction : MonoBehaviour
 {
+    public static event UseMonsterActionEvent OnUse;
+
     MonsterActionSetting settings;
 
     [SerializeField]
@@ -16,6 +20,21 @@ public class MonsterAction : MonoBehaviour
 
     [SerializeField]
     TMPro.TextMeshProUGUI valueUI;
+
+    [SerializeField]
+    TMPro.TextMeshProUGUI actionPointsUI;
+
+    [SerializeField]
+    Image typeUI;
+
+    [SerializeField]
+    Sprite attackSprite;
+
+    [SerializeField]
+    Sprite defenceSprite;
+
+    [SerializeField]
+    Sprite healingSprite;
 
     int cooldown = -2;
 
@@ -30,11 +49,25 @@ public class MonsterAction : MonoBehaviour
         }
     }
 
+    public IEnumerable<int> HighestDiceValues
+    {
+        get
+        {
+            for (int i = 0; i<diceValues.Length; i++)
+            {
+                yield return settings.Slots[i].Effect == DieEffect.Subtract ? -1 : 6;
+            }
+        }
+    }
+
     public string Name => settings.Name;
 
     public Sprite Sprite => settings.Sprite;
 
-    public int Value => DiceValues(true).Sum();
+    public int Value => Mathf.Max(0, DiceValues(true).Sum());
+    public int HighestPossibleValue => HighestDiceValues.Sum();
+
+    public string ValueRange => $"{Value} - {HighestPossibleValue}";
 
     public void Config(MonsterActionSetting setting)
     {
@@ -42,23 +75,45 @@ public class MonsterAction : MonoBehaviour
         diceValues = new int[setting.Slots.Length];
         actionSprite.sprite = setting.Sprite;
         titleUI.text = setting.Name;
-        valueUI.text = Value.ToString();
+        valueUI.text = ValueRange.ToString();
+        actionPointsUI.text = setting.ActionPoints.ToString();
+
+        switch (setting.ActionType)
+        {
+            case ActionType.Attack:
+                typeUI.sprite = attackSprite;
+                break;
+            case ActionType.Defence:
+                typeUI.sprite = defenceSprite;
+                break;
+            case ActionType.Healing:
+                typeUI.sprite = healingSprite;
+                break;
+        }
     }
 
+    public ActionType ActionType => settings.ActionType;
     public bool IsAttack => settings.ActionType == ActionType.Attack;
     public bool IsHeal => settings.ActionType == ActionType.Healing;
     public bool IsDefence => settings.ActionType == ActionType.Defence;
 
     public bool IsOnCooldown => settings == null || cooldown < settings.Cooldown; 
-    public bool CanBeUsed => settings != null && settings.ActionType != ActionType.Defence && !IsOnCooldown && Value != 0;
+    public bool IsUsableActiveAction => settings != null && !IsDefence && !IsOnCooldown && Value > 0;
+    public bool IsUsablePassiveAction => settings != null && IsDefence && !IsOnCooldown && Value > 0;
 
     public int ActionPoints => settings.ActionPoints;
 
     public int Cooldown => Mathf.Max(0, settings.Cooldown - cooldown);
 
+    public void RevealValue()
+    {
+        valueUI.text = Value.ToString();
+    }
+
     public void Use()
     {
         cooldown = -1;
+        OnUse?.Invoke(this);
     }
 
     public void NewTurn()
@@ -75,7 +130,10 @@ public class MonsterAction : MonoBehaviour
         {
             cooldown++;
         }
-        Debug.Log($"[Monster Card] {Name} can be used in {Cooldown} turns");
+
+        valueUI.text = ValueRange.ToString();
+
+        Debug.Log($"[{Name}] can be used in {Cooldown} turns");
     }
 
     public void DecayDice()
@@ -86,8 +144,6 @@ public class MonsterAction : MonoBehaviour
 
             diceValues[i] = Mathf.Max(1, diceValues[i] - 1);
         }
-
-        valueUI.text = Value.ToString();
     }
 
     public bool TakeDie(int value)
@@ -108,7 +164,7 @@ public class MonsterAction : MonoBehaviour
                     currentDelta = currentDiceValues[i] - value;
                     break;
                 default:
-                    Debug.LogWarning($"Monster attack '{name}', die index {i} has effect {slot.Effect} which is unknown");
+                    Debug.LogWarning($"[{Name}] Die index {i} has effect {slot.Effect} which is unknown");
                     break;
             }
             if (currentDelta > delta)
@@ -121,7 +177,7 @@ public class MonsterAction : MonoBehaviour
         if (pos == -1) return false;
 
         diceValues[pos] = value;
-        valueUI.text = Value.ToString();
+        Debug.Log($"[{Name}] Slotted die with value {value} into slot {pos}");
 
         return true;
     }

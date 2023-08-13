@@ -421,7 +421,6 @@ public class Shop : MonoBehaviour
                 break;
             case ShopCardType.RollSize:
                 var rollCost = increaseRollSize.Cost(GameProgress.RollSize + 1);
-                UsedIncreaseRollSize = true;
                 card.Prepare(
                     increaseRollSize.Name,
                     "Increase number of dice that can be rolled",
@@ -438,7 +437,6 @@ public class Shop : MonoBehaviour
                 break;
             case ShopCardType.HandSize:
                 var handCost = increaseHandSize.Cost(GameProgress.CardHandSize + 1);
-                UsedIncreaseHandSize = true;
                 card.Prepare(
                     increaseHandSize.Name,
                     "Increase number of cards in play per turn",
@@ -534,10 +532,27 @@ public class Shop : MonoBehaviour
         for (int i = 0; i < GameSettings.MaxShowWares; i++)
         {
             var cardType = GetCardType(noHealthInShop);
-            if (cardType == ShopCardType.Potion)
+
+            switch (cardType)
             {
-                noHealthInShop = false;
+                case ShopCardType.Potion:
+                    noHealthInShop = false;
+                    break;
+                case ShopCardType.RollSize:
+                    UsedIncreaseRollSize = true;
+                    break;
+                case ShopCardType.MaxHealth:
+                    UsedIncreaseMaxHealth = true;
+                    break;
+                case ShopCardType.HandSize:
+                    UsedIncreaseHandSize = true;
+                    break;
+                case ShopCardType.BaseDefence:
+                    UsedIncreaseBaseDefence = true;
+                    break;
+
             }
+
             AllocatePriorities(cardType);
             PickCardByType(cardType, i);
         }
