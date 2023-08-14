@@ -4782,7 +4782,7 @@ RectTransform:
   m_Father: {fileID: 1331660288}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.18}
+  m_AnchorMin: {x: 0, y: 0.155}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
@@ -4848,7 +4848,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 0
   TargetY:
-  - -120
+  - -40
   - 0
 --- !u!114 &1873774834
 MonoBehaviour:
@@ -5496,7 +5496,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091004240076, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 30.198399
+      value: 33.338898
       objectReference: {fileID: 0}
     - target: {fileID: 1739404091004240076, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_SizeDelta.y
@@ -5628,7 +5628,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3217917282685802840, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 30.198399
+      value: 33.338898
       objectReference: {fileID: 0}
     - target: {fileID: 3217917282685802840, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
       propertyPath: m_SizeDelta.y
@@ -5651,6 +5651,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965221564}
     m_Modifications:
+    - target: {fileID: 178704888429961241, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
+      propertyPath: showScale
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 2876283435569329552, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
       propertyPath: m_Name
       value: Monster Card

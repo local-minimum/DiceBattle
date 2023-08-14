@@ -29,6 +29,9 @@ public class Die : MonoBehaviour
     [SerializeField, Range(0, 1)]
     float doubleClickTime = 0.2f;
 
+    [SerializeField, Range(0, 1)]
+    float draggingSize = 0.5f;
+
     private bool interactable;
     public bool Interactable { 
         get => interactable; 
@@ -137,6 +140,8 @@ public class Die : MonoBehaviour
             RestoreParentTransform = transform.parent as RectTransform;
         }
         transform.SetParent(CanvasTransform, true);
+        var rt = transform as RectTransform;
+        rt.sizeDelta = rt.sizeDelta * draggingSize;
         Dragging = true;
     }
 

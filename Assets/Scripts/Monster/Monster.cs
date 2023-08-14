@@ -111,12 +111,19 @@ public class Monster : MonoBehaviour
 
             action.Config(actionSettings[idx]);
             action.gameObject.SetActive(false);
+            action.OnRestoreOrder += Action_OnRestoreOrder;
         }
 
         for (var l = actions.Count; idx<l; idx++)
         {
             actions[idx].gameObject.SetActive(false);
+            actions[idx].OnRestoreOrder -= Action_OnRestoreOrder;
         }
+    }
+
+    private void Action_OnRestoreOrder()
+    {
+        ShowNonCooldownActions(false);
     }
 
     public void Configure(MonsterSettings settings)
@@ -143,11 +150,33 @@ public class Monster : MonoBehaviour
     private void OnEnable()
     {
         Battle.OnChangePhase += Battle_OnChangePhase;
+        ActionCard.OnStatus += ActionCard_OnStatus;
+        MonsterAction.OnUse += MonsterAction_OnUse;
     }
 
     private void OnDisable()
     {
         Battle.OnChangePhase -= Battle_OnChangePhase;
+        ActionCard.OnStatus -= ActionCard_OnStatus;
+        MonsterAction.OnUse -= MonsterAction_OnUse;
+    }
+
+    private void MonsterAction_OnUse(MonsterAction action)
+    {
+        if (actions.Contains(action)) ShowNonCooldownActions(false);
+    }
+
+    private void ActionCard_OnStatus(ActionCard card, ActionCardStatus status)
+    {
+        switch (status)
+        {
+            case ActionCardStatus.DragStart:
+                HideAllActions();
+                break;
+            case ActionCardStatus.DragEnd:
+                ShowNonCooldownActions(true);
+                break;
+        }
     }
 
     private void Battle_OnChangePhase(BattlePhase phase)
@@ -162,7 +191,7 @@ public class Monster : MonoBehaviour
                 break;
             case BattlePhase.SelectNumberOfDice:
                 SelectNumberAndRollDice();
-                ShowNonCooldownActions();
+                ShowNonCooldownActions(true);
                 break;
             case BattlePhase.RollDice:
                 RollDice();
@@ -349,32 +378,43 @@ public class Monster : MonoBehaviour
         }
     }
 
-    void ShowNonCooldownActions()
+    void ShowNonCooldownActions(bool updatePositions)
     {
+        Debug.Log($"[{Name}] Showing / Reordering actions");
+
         var parentSize = (transform as RectTransform).rect.size;
-        Vector2 offset = Vector2.left * parentSize.x * 0.3f; 
+        Vector2 offset = new Vector2(-1 * parentSize.x * 0.3f, -1 * parentSize.y * 0.1f); 
 
         for (int i = 0, l = actions.Count; i<l; i++)
         {
             var action = actions[i];
             if (!action.IsOnCooldown)
             {
-                Debug.Log($"[{Name}] Could potentially use <{action.Name}> ({action.ValueRange} {action.ActionType})");
                 var rt = action.transform as RectTransform;
-                var childSize = rt.rect.size;
-                rt.SetParent(transform);
-                rt.offsetMax += offset;
-                rt.offsetMin += offset;
+
+                if (updatePositions)
+                {
+                    Debug.Log($"[{Name}] Could potentially use <{action.Name}> ({action.ValueRange} {action.ActionType})");
+                    var childSize = rt.rect.size;
+                    rt.SetParent(transform);
+                    rt.offsetMax += offset;
+                    rt.offsetMin += offset;
+
+
+                    offset.y -= childSize.y * 0.15f;
+                    offset.x += childSize.x * 0.3f;
+                }
 
                 action.gameObject.SetActive(true);
-                offset.y -= childSize.y * 0.3f;
-                offset.x += childSize.x * 0.3f;
+
+                rt.SetAsLastSibling();
             }
         }
     }
 
     void HideAllActions()
     {
+        Debug.Log($"[{Name}] Hiding all actions");
         for (int i = 0, l = actions.Count; i<l; i++)
         {
             var rt = actions[i].transform as RectTransform;

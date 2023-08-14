@@ -4,8 +4,10 @@ using System.Linq;
 using UnityEngine.UI;
 using UnityEngine;
 
+public enum ActionCardStatus { DragStart, DragEnd, Click, Flip, Reveal };
+
 public delegate void ActionCardEvent(ActionCard card, Monster reciever, int damage);
-public delegate void FlipActionCardEvent(ActionCard card);
+public delegate void ActionCardStatusEvent(ActionCard card, ActionCardStatus status);
 
 public enum UtilityType { Heal };
 
@@ -15,7 +17,7 @@ public class ActionCard : MonoBehaviour
     static readonly string TooWeakReason = "Too weak to cause damage";
 
     public static event ActionCardEvent OnAction;
-    public static event FlipActionCardEvent OnFlipCard;
+    public static event ActionCardStatusEvent OnStatus;
 
     public static ActionCard DraggedCard { get; private set; }
 
@@ -88,10 +90,7 @@ public class ActionCard : MonoBehaviour
             {
                 HideOutline();
             }
-            if (!value)
-            {
-                OnFlipCard?.Invoke(this);
-            }
+            OnStatus?.Invoke(this, value ? ActionCardStatus.Reveal : ActionCardStatus.Flip);
         }
     }
 
@@ -308,6 +307,7 @@ public class ActionCard : MonoBehaviour
         {
             OutlineEffect.gameObject.SetActive(true);
             DraggedCard = this;
+            OnStatus?.Invoke(this, ActionCardStatus.DragStart);
         }
     }
 
@@ -316,6 +316,9 @@ public class ActionCard : MonoBehaviour
         DraggedCard?.HideOutline(true);
         DraggedCard = null;
         HideOutline();
+
+        Debug.Log($"[{TitleUI.text}] Hover end");
+        OnStatus?.Invoke(this, ActionCardStatus.DragEnd);
 
         if (Interactable && actionType == ActionType.Attack && Monster.HoveredMonster != null)
         {
@@ -331,6 +334,7 @@ public class ActionCard : MonoBehaviour
             target.Health -= damage;
         }
 
+        Debug.Log($"[{TitleUI.text}] Invoking attack on <{target.Name}>");
         OnAction?.Invoke(this, target, damage);
 
         FaceDownReason.text = UsedReason;
@@ -343,5 +347,7 @@ public class ActionCard : MonoBehaviour
 
         var monster = MonsterManager.instance.FirstAffectableMonster(this);
         InvokeAttack(monster);
+
+        OnStatus?.Invoke(this, ActionCardStatus.Click);
     }
 }

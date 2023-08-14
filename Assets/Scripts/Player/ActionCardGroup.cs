@@ -32,7 +32,7 @@ public class ActionCardGroup : MonoBehaviour
         ActionCard.OnAction += ActionCard_OnAction;
         Battle.OnBeginBattle += Battle_OnBeginBattle;
         Die.OnAutoslotDie += Die_OnAutoslotDie;
-        ActionCard.OnFlipCard += ActionCard_OnFlipCard;
+        ActionCard.OnStatus += ActionCard_OnFlipCard;
     }
 
 
@@ -41,7 +41,7 @@ public class ActionCardGroup : MonoBehaviour
         Battle.OnChangePhase -= Battle_OnChangePhase;
         Battle.OnBeginBattle -= Battle_OnBeginBattle;
         ActionCard.OnAction -= ActionCard_OnAction;
-        ActionCard.OnFlipCard -= ActionCard_OnFlipCard;
+        ActionCard.OnStatus -= ActionCard_OnFlipCard;
         Die.OnAutoslotDie -= Die_OnAutoslotDie;
     }
 
@@ -69,9 +69,9 @@ public class ActionCardGroup : MonoBehaviour
         SyncCards();
     }
 
-    private void ActionCard_OnFlipCard(ActionCard card)
+    private void ActionCard_OnFlipCard(ActionCard card, ActionCardStatus status)
     {
-        SyncCards();
+        if (status == ActionCardStatus.Flip) SyncCards();
     }
 
     private void Battle_OnChangePhase(BattlePhase phase)

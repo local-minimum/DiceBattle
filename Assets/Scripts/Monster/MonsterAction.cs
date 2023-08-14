@@ -5,10 +5,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public delegate void UseMonsterActionEvent(MonsterAction action);
+public delegate void RestoreMonsterActionOrderEvent();
 
 public class MonsterAction : MonoBehaviour
 {
     public static event UseMonsterActionEvent OnUse;
+    public event RestoreMonsterActionOrderEvent OnRestoreOrder;
 
     MonsterActionSetting settings;
 
@@ -112,6 +114,7 @@ public class MonsterAction : MonoBehaviour
 
     public void Use()
     {
+        transform.SetAsLastSibling();
         cooldown = -1;
         OnUse?.Invoke(this);
     }
@@ -219,5 +222,17 @@ public class MonsterAction : MonoBehaviour
         }
 
         return wants + (maybes > 1 ? maybes / 2 : maybes);
+    }
+
+    public void OnPointerEnter()
+    {
+        if (IsOnCooldown) return;
+
+        transform.SetAsLastSibling();
+    }
+
+    public void OnPointerExit()
+    {
+        OnRestoreOrder?.Invoke();
     }
 }

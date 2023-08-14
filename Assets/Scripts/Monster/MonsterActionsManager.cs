@@ -17,6 +17,9 @@ public class MonsterActionsManager : MonoBehaviour
     [SerializeField]
     float showDuration = 1;
 
+    [SerializeField, Range(0, 10)]
+    float showScale = 1.3f;
+
     Dictionary<float, MonsterAction> autohideCache = new Dictionary<float, MonsterAction>();
 
     void ShowAction(MonsterAction action)
@@ -26,6 +29,11 @@ public class MonsterActionsManager : MonoBehaviour
         action.transform.SetParent(RT);
         action.transform.SetAsLastSibling();
         action.gameObject.SetActive(true);
+
+        var rt = action.transform as RectTransform;
+
+        rt.sizeDelta = rt.rect.size * showScale;
+
         autohideCache.Add(Time.timeSinceLevelLoad + showDuration, action);
     }
 
@@ -33,6 +41,10 @@ public class MonsterActionsManager : MonoBehaviour
     {
         action.gameObject.SetActive(false);
         action.transform.SetParent(MonsterActionsRoot);
+
+        var rt = action.transform as RectTransform;
+        rt.offsetMax = Vector2.zero;
+        rt.offsetMin = Vector2.zero;
     }
 
     private void OnEnable()
