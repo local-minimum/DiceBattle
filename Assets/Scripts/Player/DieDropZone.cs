@@ -15,9 +15,6 @@ public class DieDropZone : MonoBehaviour
     Color HoverColor;
 
     [SerializeField]
-    Color DefaultColor;
-
-    [SerializeField]
     Color ValueDefaultColor;
 
     [SerializeField]
@@ -48,6 +45,23 @@ public class DieDropZone : MonoBehaviour
     bool holdsDie = false;
     public bool HoldsDie => holdsDie;
 
+    Color CurrentColor
+    {
+        get
+        {
+            if (!CanTakeDie)
+            {
+                return ValueLockedDieColor;
+            } else if (HoldsDie)
+            {
+                return ValueDieColor;
+            } else
+            {
+                return ValueDefaultColor;
+            }
+        }
+    }
+
     private bool _canTakeDie;
     public bool CanTakeDie
     {
@@ -55,17 +69,8 @@ public class DieDropZone : MonoBehaviour
         private set
         {
             _canTakeDie = value;
-            if (!value)
-            {
-                TextUI.color = ValueLockedDieColor;
-            }
-            else if (DiceValue == 0)
-            {
-                TextUI.color = DefaultColor;
-            } else
-            {
-                TextUI.color = holdsDie ? ValueDieColor : ValueDefaultColor;
-            }
+            TextUI.color = CurrentColor;
+            backgroundImage.color = TextUI.color;
 
             if (!HoldsDie)
             {
@@ -121,8 +126,8 @@ public class DieDropZone : MonoBehaviour
     {
         if (Hovered && CanTakeDie)
         {
-            ApplyEffect(DefaultColor, 1f);
             Hovered = false;
+            ApplyEffect(CurrentColor, 1f);
         }
     }
 
