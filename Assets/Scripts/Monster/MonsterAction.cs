@@ -42,6 +42,8 @@ public class MonsterAction : MonoBehaviour
         }
     }
 
+    public string DiceDetails => string.Join(", ", DiceValues(true));
+
     public IEnumerable<int> HighestDiceValues
     {
         get
@@ -159,8 +161,8 @@ public class MonsterAction : MonoBehaviour
 
         if (pos == -1) return false;
 
-        diceValues[pos] = value;
-        Debug.Log($"[{Name}] Slotted die with value {value} into slot {pos}");
+        diceValues[pos] = Mathf.Abs(value);
+        Debug.Log($"[{Name}] Slotted die with value {value} into slot {pos} causing a {delta} improvement");
 
         return true;
     }

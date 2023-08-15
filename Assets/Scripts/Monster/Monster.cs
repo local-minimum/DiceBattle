@@ -121,7 +121,7 @@ public class Monster : MonoBehaviour
 
     private void Action_OnRestoreOrder()
     {
-        ShowNonCooldownActions(false);
+        ShowPossibleActions(false, null);
     }
 
     public void Configure(MonsterSettings settings)
@@ -161,7 +161,7 @@ public class Monster : MonoBehaviour
 
     private void MonsterAction_OnUse(MonsterAction action)
     {
-        if (actions.Contains(action)) ShowNonCooldownActions(false);
+        if (actions.Contains(action)) ShowPossibleActions(false, action);
     }
 
     private void ActionCard_OnStatus(ActionCard card, ActionCardStatus status)
@@ -172,7 +172,7 @@ public class Monster : MonoBehaviour
                 HideAllActions();
                 break;
             case ActionCardStatus.DragEnd:
-                ShowNonCooldownActions(true);
+                ShowPossibleActions(true, null);
                 break;
         }
     }
@@ -189,7 +189,7 @@ public class Monster : MonoBehaviour
                 break;
             case BattlePhase.SelectNumberOfDice:
                 SelectNumberAndRollDice();
-                ShowNonCooldownActions(true);
+                ShowPossibleActions(true, null);
                 break;
             case BattlePhase.RollDice:
                 RollDice();
@@ -250,7 +250,7 @@ public class Monster : MonoBehaviour
 
                 if (action.TakeDie(value))
                 {
-                    Debug.Log($"[{Name}] <{action.Name}> took die with value {value}");
+                    Debug.Log($"[{Name}] <{action.Name}> took die with value {value} ({action.ValueRange} / {action.DiceDetails})");
                     usedDie = true;
                     break;
                 }
@@ -266,7 +266,7 @@ public class Monster : MonoBehaviour
                 if (action.TakeDie(value))
                 {
                     usedDie = true;
-                    Debug.Log($"[{Name}] <{action.Name}> took die with value {value}");
+                    Debug.Log($"[{Name}] <{action.Name}> took die with value {value} ({action.ValueRange} / {action.DiceDetails})");
                     break;
                 }
             }
@@ -381,7 +381,7 @@ public class Monster : MonoBehaviour
     [SerializeField]
     Vector2 showActionsDeltaOffset = new Vector2(0f, 1.1f);
 
-    void ShowNonCooldownActions(bool updatePositions)
+    void ShowPossibleActions(bool updatePositions, MonsterAction activatedAction)
     {
         Debug.Log($"[{Name}] Showing / Reordering actions");
 
@@ -391,10 +391,10 @@ public class Monster : MonoBehaviour
         for (int i = 0, l = actions.Count; i<l; i++)
         {
             var action = actions[i];
-            if (!action.IsOnCooldown)
-            {
-                var rt = action.transform as RectTransform;
+            var rt = action.transform as RectTransform;
 
+            if (!action.IsOnCooldown && action.ActionPoints <= ActionPoints)
+            {
                 if (updatePositions)
                 {
                     Debug.Log($"[{Name}] Could potentially use <{action.Name}> ({action.ValueRange} {action.ActionType})");
@@ -411,8 +411,21 @@ public class Monster : MonoBehaviour
                 action.gameObject.SetActive(true);
 
                 rt.SetAsLastSibling();
+            } else if (action != activatedAction)
+            {
+                HideAction(rt);
             }
         }
+    }
+
+    void HideAction(RectTransform rt)
+    {
+        rt.SetParent(actionsRoot);
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMax = Vector2.zero;
+        rt.offsetMin = Vector2.zero;
+        rt.gameObject.SetActive(false);
     }
 
     void HideAllActions()
@@ -421,12 +434,7 @@ public class Monster : MonoBehaviour
         for (int i = 0, l = actions.Count; i<l; i++)
         {
             var rt = actions[i].transform as RectTransform;
-            rt.SetParent(actionsRoot);
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMax = Vector2.zero;
-            rt.offsetMin = Vector2.zero;
-            rt.gameObject.SetActive(false);
+            HideAction(rt);
         }
     }
 
