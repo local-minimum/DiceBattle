@@ -472,12 +472,15 @@ MonoBehaviour:
   NameText: {fileID: 2876283436195791340}
   StatusText: {fileID: 2876283435749132119}
   BaseCard: {fileID: 2876283435070790816}
-  DelayDeathHide: 0.5
+  KillGate:
+    delayDuration: 1
   DefenceText: {fileID: 2876283435702520155}
   actionPrefab: {fileID: 1392810744882248043}
   actionsRoot: {fileID: 6223251809358349055}
   actionPreviewPrefab: {fileID: 4678421333066390670, guid: dd76f0718b759864cba6c739ae4b46be, type: 3}
   actionsPreviewsRoot: {fileID: 2710799760551133552}
+  showActionsInitialOffset: {x: 0, y: 0}
+  showActionsDeltaOffset: {x: 0, y: 1.1}
 --- !u!114 &178704888429961241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1518,8 +1521,8 @@ RectTransform:
   m_Father: {fileID: 2876283435569329555}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.1, y: 0.05}
-  m_AnchorMax: {x: 0.9, y: 0.75}
+  m_AnchorMin: {x: 0.05, y: 0.55}
+  m_AnchorMax: {x: 0.95, y: 0.69}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1887,6 +1890,18 @@ PrefabInstance:
     - target: {fileID: 1686514079361461130, guid: e9629d26380f56642ae390cc9553beea, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2425726189737150108, guid: e9629d26380f56642ae390cc9553beea, type: 3}
+      propertyPath: m_fontSize
+      value: 15.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4624792467513455539, guid: e9629d26380f56642ae390cc9553beea, type: 3}
+      propertyPath: m_fontSize
+      value: 21.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 7258137808837958284, guid: e9629d26380f56642ae390cc9553beea, type: 3}
+      propertyPath: m_fontSize
+      value: 15.8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e9629d26380f56642ae390cc9553beea, type: 3}

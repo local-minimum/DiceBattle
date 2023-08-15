@@ -33,6 +33,9 @@ public class DieDropZone : MonoBehaviour
     Image backgroundImage;
 
     [SerializeField]
+    Image dieImage;
+
+    [SerializeField]
     int spawnValue = 0;
 
     [SerializeField]
@@ -62,6 +65,11 @@ public class DieDropZone : MonoBehaviour
             } else
             {
                 TextUI.color = holdsDie ? ValueDieColor : ValueDefaultColor;
+            }
+
+            if (!HoldsDie)
+            {
+                dieImage.sprite = null;
             }
         }
     }
@@ -180,9 +188,9 @@ public class DieDropZone : MonoBehaviour
             OnRecycleDie?.Invoke(Value);
         }
 
+        holdsDie = true;
         DiceValue = die.Value;
         die.NoDice();
-        holdsDie = true;
         CanTakeDie = false;
 
         OnChange?.Invoke(this);
@@ -210,7 +218,16 @@ public class DieDropZone : MonoBehaviour
         set
         {
             _value = Mathf.Abs(value);
-            TextUI.text = DieEffect == DieEffect.Subtract && _value != 0 ? $"-{_value}" : _value.ToString();
+            TextUI.text = "";
+            if (HoldsDie)
+            {
+                dieImage.sprite = Iconography.GetDie(Value);
+                TextUI.text = "";
+            } else
+            {
+                dieImage.sprite = null;
+                TextUI.text = Value.ToString();
+            }
         }
     }
        

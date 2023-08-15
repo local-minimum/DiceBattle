@@ -382,9 +382,6 @@ MonoBehaviour:
   dropZonePrefab: {fileID: 3786344719475629224, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
   dropZonesParent: {fileID: 1739404091727566895}
   ActionTypeUI: {fileID: 4351689654576301929}
-  AttackSprite: {fileID: -1646579822, guid: fe0aaed3fbd42134c9cff52995ac3006, type: 3}
-  DefenceSprite: {fileID: -376159295, guid: fe0aaed3fbd42134c9cff52995ac3006, type: 3}
-  HealSprite: {fileID: -999063957, guid: fe0aaed3fbd42134c9cff52995ac3006, type: 3}
 --- !u!114 &1739404091284834233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -495,7 +492,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1739404091312659275
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1323,7 +1320,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.75
+  m_fontSize: 21.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1450,7 +1447,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3786344719221383226, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: m_fontSize
-      value: 45.9
+      value: 26.25
       objectReference: {fileID: 0}
     - target: {fileID: 3786344719475629224, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: dieEffect
@@ -1490,7 +1487,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3786344719475629228, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 55.322395
+      value: 33.338898
       objectReference: {fileID: 0}
     - target: {fileID: 3786344719475629228, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: m_SizeDelta.y
@@ -1564,7 +1561,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3786344719221383226, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: m_fontSize
-      value: 45.9
+      value: 26.25
       objectReference: {fileID: 0}
     - target: {fileID: 3786344719475629228, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: m_Pivot.x
@@ -1596,7 +1593,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3786344719475629228, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 55.322395
+      value: 33.338898
       objectReference: {fileID: 0}
     - target: {fileID: 3786344719475629228, guid: aa57b833f8beb6e4eb33fc8f99c660e8, type: 3}
       propertyPath: m_SizeDelta.y

@@ -36,14 +36,11 @@ public class DiceManager : MonoBehaviour
     }
 
     [SerializeField]
-    float nextPhaseDelay = 0.5f;
-    bool autoTriggerNextPhase;
-    float nextPhaseTime;
-
+    DelayedGate triggerNextPhase = new DelayedGate();
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
-        autoTriggerNextPhase = false;
+        triggerNextPhase.Reset();
 
         switch (phase)
         {
@@ -52,8 +49,7 @@ public class DiceManager : MonoBehaviour
                 if (diceCount == 0)
                 {
                     Debug.Log("[Dice Manager] Player has no dice to roll, go to next phase");
-                    nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
-                    autoTriggerNextPhase = true;
+                    triggerNextPhase.Lock();
                 }
                 break;
             case BattlePhase.RollDice:
@@ -63,8 +59,7 @@ public class DiceManager : MonoBehaviour
                 if (!HasDiceThatCanBeSlotted())
                 {
                     Debug.Log("[Dice Manager] Player has no dice to use, go to next phase");
-                    nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
-                    autoTriggerNextPhase = true;
+                    triggerNextPhase.Lock();
                 }
                 break;
             case BattlePhase.PlayerAttack:
@@ -202,8 +197,7 @@ public class DiceManager : MonoBehaviour
     {
         if (!HasDiceThatCanBeSlotted())
         {
-            autoTriggerNextPhase = true;
-            nextPhaseTime = Time.timeSinceLevelLoad + nextPhaseDelay;
+            triggerNextPhase.Lock();
         }
     }
 
@@ -217,10 +211,9 @@ public class DiceManager : MonoBehaviour
     private void Update()
     {
         
-        if (autoTriggerNextPhase && Time.timeSinceLevelLoad > nextPhaseTime)
+        if (triggerNextPhase.Open(out bool toggled))
         {
-            autoTriggerNextPhase = false;
-            if (Battle.Phase == BattlePhase.UseDice || Battle.Phase == BattlePhase.SelectNumberOfDice)
+            if (toggled && (Battle.Phase == BattlePhase.UseDice || Battle.Phase == BattlePhase.SelectNumberOfDice))
             {
                 Battle.Phase = Battle.Phase.NextPhase();
             }

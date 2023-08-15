@@ -201,7 +201,8 @@ public class Die : MonoBehaviour
     public void Roll()
     {
         Value = Random.Range(1, 7);
-        DieText.text = Value.ToString();
+        buttonImage.sprite = Iconography.GetDie(Value);
+        DieText.text = "";
         Rolled = true;
         transform.SetAsFirstSibling();
     }
@@ -217,6 +218,7 @@ public class Die : MonoBehaviour
     {
         Clear();
         Interactable = false;
+        buttonImage.sprite = Iconography.GetDie(0);
     }
 
     public void HasDie()

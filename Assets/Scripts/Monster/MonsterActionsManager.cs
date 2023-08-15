@@ -26,13 +26,16 @@ public class MonsterActionsManager : MonoBehaviour
     {
         action.RevealValue();
 
-        action.transform.SetParent(RT);
-        action.transform.SetAsLastSibling();
+        var rt = action.transform as RectTransform;
+        var scaleOffset = rt.rect.size / 2 * showScale;
+
+        rt.SetAsLastSibling();
+
+
         action.gameObject.SetActive(true);
 
-        var rt = action.transform as RectTransform;
-
-        rt.sizeDelta = rt.rect.size * showScale;
+        rt.offsetMin -= scaleOffset;
+        rt.offsetMax += scaleOffset;
 
         autohideCache.Add(Time.timeSinceLevelLoad + showDuration, action);
     }

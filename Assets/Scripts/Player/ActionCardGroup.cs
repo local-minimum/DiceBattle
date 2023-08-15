@@ -76,7 +76,7 @@ public class ActionCardGroup : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
-        triggerNextPhase = false;
+        nextPhaseGate.Reset();
 
         switch (phase)
         {
@@ -150,23 +150,18 @@ public class ActionCardGroup : MonoBehaviour
 
         if (!anyInteractable && Battle.Phase == BattlePhase.PlayerAttack)
         {
-            triggerTime = Time.timeSinceLevelLoad + triggerDelay;
-            triggerNextPhase = true;
+            nextPhaseGate.Lock();
         }
     }
 
     [SerializeField]
-    float triggerDelay = 0.5f;
-
-    bool triggerNextPhase;
-    float triggerTime;
+    DelayedGate nextPhaseGate = new DelayedGate();
 
     private void Update()
     {
-        if (triggerNextPhase && triggerTime > Time.timeSinceLevelLoad)
+        if (nextPhaseGate.Open(out bool toggled))
         {
-            triggerNextPhase = false;
-            if (Battle.Phase == BattlePhase.PlayerAttack)
+            if (toggled && Battle.Phase == BattlePhase.PlayerAttack)
             {
                 Battle.Phase = Battle.Phase.NextPhase();
             }

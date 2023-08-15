@@ -29,15 +29,6 @@ public class MonsterAction : MonoBehaviour
     [SerializeField]
     Image typeUI;
 
-    [SerializeField]
-    Sprite attackSprite;
-
-    [SerializeField]
-    Sprite defenceSprite;
-
-    [SerializeField]
-    Sprite healingSprite;
-
     int cooldown = -2;
 
     int[] diceValues;
@@ -78,20 +69,9 @@ public class MonsterAction : MonoBehaviour
         actionSprite.sprite = setting.Sprite;
         titleUI.text = setting.Name;
         valueUI.text = ValueRange.ToString();
-        actionPointsUI.text = setting.ActionPoints.ToString();
+        actionPointsUI.text = $"AP: {setting.ActionPoints}";
 
-        switch (setting.ActionType)
-        {
-            case ActionType.Attack:
-                typeUI.sprite = attackSprite;
-                break;
-            case ActionType.Defence:
-                typeUI.sprite = defenceSprite;
-                break;
-            case ActionType.Healing:
-                typeUI.sprite = healingSprite;
-                break;
-        }
+        typeUI.sprite = Iconography.GetAction(setting.ActionType);
     }
 
     public ActionType ActionType => settings.ActionType;

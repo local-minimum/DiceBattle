@@ -252,6 +252,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 1330329155}
   VisiblePhases: 0300000004000000
+  delayedVisibility:
+    delayDuration: 1.5
 --- !u!114 &69284389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -467,6 +469,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &121129488
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 121129490}
+  - component: {fileID: 121129489}
+  m_Layer: 0
+  m_Name: Iconography
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &121129489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121129488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fe3c255026bba24585006825f80f429, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AttackSprite: {fileID: -1646579822, guid: fe0aaed3fbd42134c9cff52995ac3006, type: 3}
+  DefenceSprite: {fileID: -376159295, guid: fe0aaed3fbd42134c9cff52995ac3006, type: 3}
+  HealingSprite: {fileID: -999063957, guid: fe0aaed3fbd42134c9cff52995ac3006, type: 3}
+  UnknownActionSprite: {fileID: 0}
+  DieNegOneSprite: {fileID: 21300000, guid: a44bdc7b24762524e997d83b0e62d76d, type: 3}
+  DieNegTwoSprite: {fileID: 21300000, guid: 5f2d93c3346c9fe4786c8b649f020ff3, type: 3}
+  DieNegThreeSprite: {fileID: 21300000, guid: c5eff6665656c864da1e5a3f6e14f778, type: 3}
+  DieNegFourSprite: {fileID: 21300000, guid: fc6c587dfd4f4b543a415d5a12cd0384, type: 3}
+  DieNegFiveSprite: {fileID: 21300000, guid: 223b521be25ebbf40b3a46537d748483, type: 3}
+  DieNegSixSprite: {fileID: 21300000, guid: f18006d1c038e4d449bf2967e54e471f, type: 3}
+  DieOneSprite: {fileID: 21300000, guid: 7fa551946a818ec459b62052341daea9, type: 3}
+  DieTwoSprite: {fileID: 21300000, guid: 0577c45852ae60b44972320717050fd2, type: 3}
+  DieThreeSprite: {fileID: 21300000, guid: 0d29b68ceff7c2e4699f7b3169015d08, type: 3}
+  DieFourSprite: {fileID: 21300000, guid: d768e4222845d5642844bcb22de35e67, type: 3}
+  DieFiveSprite: {fileID: 21300000, guid: 106ec2218c7adbd40991378db5cf0ae0, type: 3}
+  DieSixSprite: {fileID: 21300000, guid: e820db703e94b8a45901508eda35077a, type: 3}
+  NoDie: {fileID: 21300000, guid: 0cdf2070da9bbf047af36cd744435b9b, type: 3}
+--- !u!4 &121129490
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121129488}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 409.13824, y: 262.78503, z: 1.3773967}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &149091210 stripped
 RectTransform:
@@ -1543,7 +1606,8 @@ MonoBehaviour:
   - {fileID: 795438897}
   actionCardGroup: {fileID: 1873774835}
   diceCount: 20
-  nextPhaseDelay: 0.5
+  triggerNextPhase:
+    delayDuration: 1
 --- !u!114 &808170741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4880,7 +4944,8 @@ MonoBehaviour:
   minActionsPerRound: 1000
   saveableActions: 0
   CardPrefab: {fileID: 1739404091284834232, guid: d98174b2fd0fe5a4780ae146fcaf5cdf, type: 3}
-  triggerDelay: 0.5
+  nextPhaseGate:
+    delayDuration: 1
 --- !u!1001 &1875567648
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5797,6 +5862,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5027592192788879261, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6223251809358349055, guid: dac5bb14300e97d4d9a9ac9ba78f153b, type: 3}
+      propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

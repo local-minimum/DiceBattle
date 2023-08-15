@@ -103,15 +103,6 @@ public class ActionCard : MonoBehaviour
     [SerializeField]
     Image ActionTypeUI;
 
-    [SerializeField]
-    Sprite AttackSprite;
-
-    [SerializeField]
-    Sprite DefenceSprite;
-
-    [SerializeField]
-    Sprite HealSprite;
-
     DieDropZone GetSlot(int idx)
     {
         if (idx < dropZones.Count) return dropZones[idx];
@@ -177,18 +168,16 @@ public class ActionCard : MonoBehaviour
             dropZones[idx].gameObject.SetActive(false);
         }
 
+        ActionTypeUI.sprite = Iconography.GetAction(settings.ActionType);
         switch (settings.ActionType)
         {
             case ActionType.Attack:
-                ActionTypeUI.sprite = AttackSprite;
                 FaceDownTitle.text = "Attack";
                 break;
             case ActionType.Defence:
-                ActionTypeUI.sprite = DefenceSprite;
                 FaceDownTitle.text = "Defence";
                 break;
             case ActionType.Healing:
-                ActionTypeUI.sprite = HealSprite;
                 FaceDownTitle.text = "Healing";
                 break;
             default:

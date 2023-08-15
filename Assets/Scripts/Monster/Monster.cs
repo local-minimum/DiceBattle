@@ -50,16 +50,14 @@ public class Monster : MonoBehaviour
             if (_health.Value == 0)
             {
                 GameProgress.XP += XpReward;
-                deathHide = Time.timeSinceLevelLoad + DelayDeathHide;
+                KillGate.Lock();
                 OnDeath?.Invoke(this);
             }
         }
     }
 
     [SerializeField]
-    float DelayDeathHide = 0.5f;
-
-    float deathHide;
+    DelayedGate KillGate = new DelayedGate();
 
     [SerializeField]
     TMPro.TextMeshProUGUI DefenceText;
@@ -200,7 +198,7 @@ public class Monster : MonoBehaviour
                 SlotDice();
                 break;
             case BattlePhase.MonsterAttack:
-                RevealDiceValues();
+                // RevealDiceValues();
                 break;
         }
     }
@@ -378,12 +376,17 @@ public class Monster : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    Vector2 showActionsInitialOffset = Vector2.zero;
+    [SerializeField]
+    Vector2 showActionsDeltaOffset = new Vector2(0f, 1.1f);
+
     void ShowNonCooldownActions(bool updatePositions)
     {
         Debug.Log($"[{Name}] Showing / Reordering actions");
 
         var parentSize = (transform as RectTransform).rect.size;
-        Vector2 offset = new Vector2(-1 * parentSize.x * 0.3f, -1 * parentSize.y * 0.1f); 
+        Vector2 offset = new Vector2(parentSize.x * showActionsInitialOffset.x, parentSize.y * showActionsInitialOffset.y); 
 
         for (int i = 0, l = actions.Count; i<l; i++)
         {
@@ -401,8 +404,8 @@ public class Monster : MonoBehaviour
                     rt.offsetMin += offset;
 
 
-                    offset.y -= childSize.y * 0.15f;
-                    offset.x += childSize.x * 0.3f;
+                    offset.x += childSize.x * showActionsDeltaOffset.x;
+                    offset.y -= childSize.y * showActionsDeltaOffset.y;
                 }
 
                 action.gameObject.SetActive(true);
@@ -475,9 +478,9 @@ public class Monster : MonoBehaviour
 
     private void Update()
     {
-        if (!Alive && Time.timeSinceLevelLoad > deathHide)
+        if (!Alive && KillGate.Open(out bool toggled))
         {
-            gameObject.SetActive(false);
+            if (toggled) gameObject.SetActive(false);
         }
     }
 }

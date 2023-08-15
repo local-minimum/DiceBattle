@@ -10,6 +10,9 @@ public class PhaseDoneBtn : MonoBehaviour
     [SerializeField]
     List<BattlePhase> VisiblePhases = new List<BattlePhase>() { BattlePhase.UseDice, BattlePhase.PlayerAttack };
 
+    [SerializeField]
+    DelayedGate delayedVisibility;
+
     private void OnEnable()
     {
         Battle.OnChangePhase += Battle_OnChangePhase;
@@ -22,19 +25,37 @@ public class PhaseDoneBtn : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
-        button.SetActive(VisiblePhases.Contains(phase));
+        button.SetActive(false);
+        if (VisiblePhases.Contains(phase))
+        {
+            delayedVisibility.Lock();
+        } else
+        {
+            delayedVisibility.Reset();
+        }
     }
 
     public void OnClickButton()
     {
+        if (delayedVisibility.Locked) return;
+
+        button.SetActive(false);
         Battle.Phase = Battle.Phase.NextPhase();
     }
 
     private void Update()
     {
-        if (button.activeSelf && Input.GetKeyDown(KeyCode.Return))
+        if (delayedVisibility.Open(out bool toggled))
         {
-            OnClickButton();
+            if (toggled)
+            {
+                button.SetActive(true);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                OnClickButton();
+            }
         }
     }
 }
