@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class BattlePhaser : MonoBehaviour
 {
-    List<BattlePhase> AutoPhases = new List<BattlePhase>() { BattlePhase.Intro, BattlePhase.RollDice, BattlePhase.None, BattlePhase.Outro, BattlePhase.Cleanup };
+    List<BattlePhase> AutoPhases = new List<BattlePhase>() { 
+        BattlePhase.Intro, 
+        BattlePhase.RollDice, 
+        BattlePhase.None,
+        BattlePhase.Outro,
+        BattlePhase.Cleanup,
+    };
 
     [SerializeField]
-    float autophaseDelay = 0.2f;
-
-    bool autophase;
-    float nextPhaseTime;
+    DelayedGate automaticPhaseGate = new DelayedGate(0.5f);
+    [SerializeField]
+    DelayedGate automaticSceneUnload = new DelayedGate(1f);
 
     private void Start()
     {
@@ -38,29 +43,38 @@ public class BattlePhaser : MonoBehaviour
 
     private void Battle_OnChangePhase(BattlePhase phase)
     {
-        Debug.Log($"[Battle Phaser] New phase is <{phase}>; Automatically switch to next phase: {AutoPhases.Contains(phase)}");
         if (AutoPhases.Contains(phase))
         {
-            nextPhaseTime = Time.timeSinceLevelLoad + autophaseDelay;
-            autophase = true;
-        } else if (autophase)
+            automaticPhaseGate.Lock();
+            Debug.Log($"[Battle Phaser] Preparing automatic exit of phase <{phase}>");
+        } else if (automaticPhaseGate.Locked)
         {
-            autophase = false;
+            automaticPhaseGate.Reset();
         }
     }
 
     private void Update()
     {
-        if (autophase && Time.timeSinceLevelLoad > nextPhaseTime)
+        if (automaticPhaseGate.Open(out bool toggled))
         {
-            autophase = false;
-
             if (Battle.Phase == BattlePhase.Outro)
             {
-                GameProgress.ExitBattle();
+                if (toggled)
+                {
+                    Debug.Log($"[Battle Phaser] Adding extra wait time until scene change");
+                    automaticSceneUnload.Lock();
+                } else if (!automaticSceneUnload.Locked)
+                {
+                    Debug.Log($"[Battle Phaser] Exiting battle scene");
+                    GameProgress.ExitBattle();
+                }
             } else
             {
-                Battle.Phase = Battle.Phase.NextPhase();
+                if (toggled)
+                {
+                    Debug.Log($"[Battle Phaser] Changing phase");
+                    Battle.Phase = Battle.Phase.NextPhase();
+                }
             }
         }
     }

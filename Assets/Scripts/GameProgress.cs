@@ -213,7 +213,7 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     {
         get => instance._fights;
     }
-    public static void IncreaseFights()
+    public static void IncreaseCompletedFights()
     {
         instance._fights++;
     }
@@ -223,7 +223,7 @@ public class GameProgress : DeCrawl.Primitives.FindingSingleton<GameProgress>
     private static string _nextScene = "XP-Shop";
     public static void ExitBattle()
     {
-        Debug.Log($"Next scene is {_nextScene}");
+        Debug.Log($"[Game Progress] Next scene is {_nextScene}");
         SceneManager.LoadScene(_nextScene);
     }
     private static string _battleScene = "Battle";

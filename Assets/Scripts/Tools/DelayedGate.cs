@@ -12,6 +12,16 @@ public class DelayedGate
 
     float openTime;
 
+    public DelayedGate(float delayDuration)
+    {
+        this.delayDuration = delayDuration;
+    }
+
+    public DelayedGate()
+    {
+
+    }
+
     public bool Locked => delay && Time.timeSinceLevelLoad < openTime;
 
     public void Lock()

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 public class BattleLog : MonoBehaviour
 {
@@ -19,7 +20,6 @@ public class BattleLog : MonoBehaviour
         ActionCard.OnAction += ActionCard_OnAction;
         Monster.OnReport += Monster_OnReport;
         Monster.OnAttack += Monster_OnAttack;
-        MonsterManager.OnWipe += MonsterManager_OnWipe;
         PlayerCharacter.OnHealthChange += PlayerCharacter_OnHealthChange;
     }
 
@@ -29,24 +29,17 @@ public class BattleLog : MonoBehaviour
         ActionCard.OnAction -= ActionCard_OnAction;
         Monster.OnReport -= Monster_OnReport;
         Monster.OnAttack -= Monster_OnAttack;
-        MonsterManager.OnWipe -= MonsterManager_OnWipe;
         PlayerCharacter.OnHealthChange -= PlayerCharacter_OnHealthChange;
-    }
-
-    private void MonsterManager_OnWipe()
-    {
-        History.Enqueue("**All monsters have been vaquished**");
-        Publish();
     }
 
     private void PlayerCharacter_OnHealthChange(int newHealth, int delta)
     {
         if (delta < 0)
         {
-            History.Enqueue($"[Player] Lost {Mathf.Abs(delta)} health ({newHealth})");
+            History.Enqueue($"[Player] Lost **{Mathf.Abs(delta)} health**");
         } else if (delta > 0)
         {
-            History.Enqueue($"[Player] Restored {delta} health ({newHealth})");
+            History.Enqueue($"[Player] Restored **{delta} health**");
         }
 
         Publish();
@@ -54,7 +47,7 @@ public class BattleLog : MonoBehaviour
 
     private void Monster_OnAttack(Monster monster, MonsterAction action)
     {
-        History.Enqueue($"[{monster.Name}] Does {action.Name} with strength {action.Value}");
+        History.Enqueue($"[{monster.Name}] Does <{action.Name}> with **{action.Value} strength**");
         Publish();
     }
 
@@ -68,23 +61,28 @@ public class BattleLog : MonoBehaviour
     {
         if (receiver == null)
         {
-            History.Enqueue($"[Player] applies {card.ItemName} with value {card.Value}");
+            History.Enqueue($"[Player] Applies <{card.ItemName}> with **{card.Value} strength**");
         } else if (card.Value <= 0)
         {
-            History.Enqueue($"[Player] performs {card.ItemName} in the air in front of {receiver.Name}");
+            History.Enqueue($"[Player] Performs <{card.ItemName}> in the air in front of <{receiver.Name}>");
         } else
         {
             if (damage <= 0)
             {
-                History.Enqueue($"[Player] attacks {receiver.Name} with a {card.Value} points {card.ItemName} but fails to damage them");
+                History.Enqueue($"[Player] Attacks <{receiver.Name}> with a {card.Value} points <{card.ItemName}> but fails to damage them");
             } else
             {
-                History.Enqueue($"[Player] attacks {receiver.Name} with a {card.Value} points {card.ItemName} causing {damage} damage");
+                History.Enqueue($"[Player] Attacks <{receiver.Name}> with a {card.Value} points <{card.ItemName}> causing **{damage} damage**");
 
                 if (receiver.Health == 0)
                 {
-                    History.Enqueue($"[{receiver.Name}] dies");
-                    History.Enqueue($"[Player] gains {receiver.XpReward} XP");
+                    History.Enqueue($"[{receiver.Name}] Dies!");
+                    History.Enqueue($"[Player] Gains **{receiver.XpReward} XP**");
+
+                    if (!MonsterManager.instance.AnyAlive)
+                    {
+                        History.Enqueue("[Battle] **All monsters have been vaquished**");
+                    }
                 }
             }
         }
@@ -102,9 +100,16 @@ public class BattleLog : MonoBehaviour
         }
     }
 
+    IEnumerable<string> MarkedUpHistory => History
+        .Select(line => {
+            var objects = Regex.Replace(line, @"(\<.*?\>)", "<color=#FF55FF>" + @"$1" + "</color>");
+            var subjects = Regex.Replace(objects, @"(\[.*?\])", "<b><color=#119944>" + @"$1" + "</color></b>");
+            return Regex.Replace(subjects, @"\*\*(.*?)\*\*", "<u>" + @"$1" + "</u>");
+        });
+
     void Publish()
     {
         TruncateHistory();
-        TextUI.text = string.Join("\n", History.Reverse());
+        TextUI.text = string.Join("\n", MarkedUpHistory.Reverse());
     }
 }

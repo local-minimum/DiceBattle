@@ -343,8 +343,7 @@ public class Monster : MonoBehaviour
         }
 
         Debug.Log($"[{Name}] {text}");
-        StatusText.text = text;
-        OnReport?.Invoke(this, text);
+        StatusText.text = "";
     }
 
     void SelectNumberAndRollDice()
@@ -362,7 +361,7 @@ public class Monster : MonoBehaviour
         diceHeld -= diceCount;
         diceValues = new int[diceCount];
 
-        var text = $"Will roll {diceValues.Length} dice";
+        var text = $"Will roll **{diceValues.Length} dice**";
         Debug.Log($"[{Name}] {text}");
         StatusText.text = text;
         OnReport?.Invoke(this, text);

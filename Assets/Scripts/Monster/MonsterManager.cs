@@ -26,7 +26,7 @@ public class MonsterManager : DeCrawl.Primitives.FindingSingleton<MonsterManager
 
     IEnumerable<Monster> ActiveMonsters => Monsters.Where(m => m.gameObject.activeSelf);
 
-    bool AnyAlive
+    public bool AnyAlive
     {
         get
         {
@@ -131,7 +131,7 @@ public class MonsterManager : DeCrawl.Primitives.FindingSingleton<MonsterManager
     {
         if (!AnyAlive)
         {
-            GameProgress.IncreaseFights();
+            GameProgress.IncreaseCompletedFights();
 
             OnWipe?.Invoke();
         }
