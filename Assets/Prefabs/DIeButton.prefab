@@ -380,6 +380,7 @@ MonoBehaviour:
   DieText: {fileID: 4749157678803794537}
   button: {fileID: 5873130719400297420}
   buttonImage: {fileID: 5873130719400297419}
+  doubleClickTime: 0.6
   dragFuzzTime: 0.3
 --- !u!114 &8305253981924251548
 MonoBehaviour:
