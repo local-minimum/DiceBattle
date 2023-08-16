@@ -22,11 +22,21 @@ public class ActionCardGroup : MonoBehaviour
     public int SlottablePositions => ActiveCards.Sum(c => c.OpenSlots);
     public int Defence => ActiveCards.Sum(c => c.Action == ActionType.Defence ? c.Value : 0);
 
-    private void OnEnable()
+    private void Start()
     {
         actionCards.Clear();
         actionCards.AddRange(GetComponentsInChildren<ActionCard>());
+
+        for (int i=0, l=actionCards.Count; i<l; i++)
+        {
+            actionCards[i].gameObject.SetActive(false);
+        }
+
         SlotedDiceCache.Clear();
+    }
+
+    private void OnEnable()
+    {
 
         Battle.OnChangePhase += Battle_OnChangePhase;
         ActionCard.OnAction += ActionCard_OnAction;
