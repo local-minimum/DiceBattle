@@ -13,4 +13,13 @@ public class MonsterActionSetting : ScriptableObject
     public DiceSlot[] Slots;
     public Sprite Sprite;
     public int EquipCost;
+
+    public string Notation
+    {
+        get
+        {
+            var dice = string.Join(" ", Slots);
+            return $"<{ActionType}> {dice}";
+        }
+    }
 }

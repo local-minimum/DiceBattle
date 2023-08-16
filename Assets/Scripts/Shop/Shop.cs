@@ -457,7 +457,7 @@ public class Shop : MonoBehaviour
                 int destroyCost = Mathf.RoundToInt(DestroyCostMultiplier * setting.ShopCost);
                 card.Prepare(
                     $"DESTROY: {setting.Name}",
-                    setting.Summary(),
+                    setting.Notation,
                     setting.Sprite,
                     destroyCost,
                     delegate
@@ -474,7 +474,7 @@ public class Shop : MonoBehaviour
                 NewCards.RemoveAt(0);
                 card.Prepare(
                     newSetting.Name,
-                    newSetting.Summary(),
+                    newSetting.Notation,
                     newSetting.Sprite,
                     newSetting.ShopCost,
                     delegate

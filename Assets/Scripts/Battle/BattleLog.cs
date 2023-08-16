@@ -61,18 +61,18 @@ public class BattleLog : MonoBehaviour
     {
         if (receiver == null)
         {
-            History.Enqueue($"[Player] Applies <{card.ItemName}> with **{card.Value} strength**");
+            History.Enqueue($"[Player] Applies <{card.Name}> with **{card.Value} strength**");
         } else if (card.Value <= 0)
         {
-            History.Enqueue($"[Player] Performs <{card.ItemName}> in the air in front of <{receiver.Name}>");
+            History.Enqueue($"[Player] Performs <{card.Name}> in the air in front of <{receiver.Name}>");
         } else
         {
             if (damage <= 0)
             {
-                History.Enqueue($"[Player] Attacks <{receiver.Name}> with a {card.Value} points <{card.ItemName}> but fails to damage them");
+                History.Enqueue($"[Player] Attacks <{receiver.Name}> with a {card.Value} points <{card.Name}> but fails to damage them");
             } else
             {
-                History.Enqueue($"[Player] Attacks <{receiver.Name}> with a {card.Value} points <{card.ItemName}> causing **{damage} damage**");
+                History.Enqueue($"[Player] Attacks <{receiver.Name}> with a {card.Value} points <{card.Name}> causing **{damage} damage**");
 
                 if (receiver.Health == 0)
                 {

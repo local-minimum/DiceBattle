@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public delegate void UseMonsterActionEvent(MonsterAction action);
 public delegate void RestoreMonsterActionOrderEvent();
 
-public class MonsterAction : MonoBehaviour
+public class MonsterAction : MonoBehaviour, IBattleCard
 {
     public static event UseMonsterActionEvent OnUse;
     public event RestoreMonsterActionOrderEvent OnRestoreOrder;
@@ -44,7 +44,7 @@ public class MonsterAction : MonoBehaviour
 
     public string DiceDetails => string.Join(", ", DiceValues(true));
 
-    public IEnumerable<int> HighestDiceValues
+    IEnumerable<int> HighestDiceValues
     {
         get
         {
@@ -56,6 +56,7 @@ public class MonsterAction : MonoBehaviour
     }
 
     public string Name => settings.Name;
+    public string Notation => settings.Notation;
 
     public Sprite Sprite => settings.Sprite;
 
@@ -63,6 +64,7 @@ public class MonsterAction : MonoBehaviour
     public int HighestPossibleValue => HighestDiceValues.Sum();
 
     public string ValueRange => $"{Value} - {HighestPossibleValue}";
+
 
     public void Config(MonsterActionSetting setting)
     {

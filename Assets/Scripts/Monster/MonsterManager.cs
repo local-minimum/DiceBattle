@@ -34,12 +34,12 @@ public class MonsterManager : DeCrawl.Primitives.FindingSingleton<MonsterManager
         }
     }
 
-    public bool CanHurtAnyMonster(ActionCard action) => action.Action == ActionType.Attack && ActiveMonsters.Any(m => m.Defence < action.Value);
+    public bool CanHurtAnyMonster(ActionCard action) => action.ActionType == ActionType.Attack && ActiveMonsters.Any(m => m.Defence < action.Value);
     public bool CanAffectAnyMonster(ActionCard action) => 
-        action.Action == ActionType.Attack && ActiveMonsters.Any(m => m.BaseDefence < action.Value);
+        action.ActionType == ActionType.Attack && ActiveMonsters.Any(m => m.BaseDefence < action.Value);
 
     public Monster FirstAffectableMonster(ActionCard action) => 
-        action.Action == ActionType.Attack ? ActiveMonsters.FirstOrDefault(m => m.BaseDefence < action.Value) : null;
+        action.ActionType == ActionType.Attack ? ActiveMonsters.FirstOrDefault(m => m.BaseDefence < action.Value) : null;
 
 
     Monster GetMonster(int index)

@@ -15,9 +15,9 @@ public struct DiceSlot
 
     public override string ToString()
     {
-        var effect = Effect == DieEffect.Add ? "+" : "-";
+        var effect = Effect == DieEffect.Add ? "" : "-";
         var value = HasDefaultValue ? "D6" : DefaultValue.ToString();
-        return $"{effect} {value}";
+        return $"[{effect}{value}]";
     }
 }
 
@@ -30,14 +30,12 @@ public class ActionCardSetting : ScriptableObject
     public Sprite Sprite;
     public int ShopCost;
 
-    public string Summary()
+    public string Notation
     {
-        var dice = string.Join(" ", Slots);
-        if (dice.StartsWith("+"))
+        get
         {
-            dice = dice.Substring(2);
+            var dice = string.Join(" ", Slots);
+            return $"<{ActionType}> {dice}";
         }
-
-        return $"[{ActionType}] {dice}";
     }
 }

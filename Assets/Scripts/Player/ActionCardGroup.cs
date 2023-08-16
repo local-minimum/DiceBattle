@@ -20,7 +20,7 @@ public class ActionCardGroup : MonoBehaviour
     }
 
     public int SlottablePositions => ActiveCards.Sum(c => c.OpenSlots);
-    public int Defence => ActiveCards.Sum(c => c.Action == ActionType.Defence ? c.Value : 0);
+    public int Defence => ActiveCards.Sum(c => c.ActionType == ActionType.Defence ? c.Value : 0);
 
     private void Start()
     {
@@ -151,9 +151,9 @@ public class ActionCardGroup : MonoBehaviour
         for (int i = 0; i<actionCards.Count; i++)
         {
             var card = actionCards[i];
-            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.Action == ActionType.Attack && card.Interactable)
+            if (card.FacingUp && card.ActionPoints <= ActionPoints && card.ActionType == ActionType.Attack && card.Interactable)
             {
-                Debug.Log($"[Action Card Group] [{card.ItemName}] is interactable {card.Interactable}");
+                Debug.Log($"[Action Card Group] [{card.Name}] is interactable {card.Interactable}");
                 anyInteractable = true;
             }
         }

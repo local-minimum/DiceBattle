@@ -11,7 +11,7 @@ public delegate void ActionCardStatusEvent(ActionCard card, ActionCardStatus sta
 
 public enum UtilityType { Heal };
 
-public class ActionCard : MonoBehaviour
+public class ActionCard : MonoBehaviour, IBattleCard
 {
     static readonly string UsedReason = "Used";
     static readonly string TooWeakReason = "Too weak to cause damage";
@@ -23,7 +23,7 @@ public class ActionCard : MonoBehaviour
 
     [SerializeField]
     ActionType actionType = ActionType.Attack;
-    public ActionType Action => actionType;
+    public ActionType ActionType => actionType;
 
     [SerializeField]
     TMPro.TextMeshProUGUI SlottedDiceUI;
@@ -64,7 +64,6 @@ public class ActionCard : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI FaceDownReason;
 
-    public string ItemName => TitleUI.text;
     public bool Interactable
     {
         get
@@ -72,7 +71,7 @@ public class ActionCard : MonoBehaviour
             switch (Battle.Phase)
             {
                 case BattlePhase.PlayerAttack:
-                    return Action == ActionType.Attack && FacingUp;
+                    return ActionType == ActionType.Attack && FacingUp;
                 default:
                     return false;
             }
@@ -83,7 +82,7 @@ public class ActionCard : MonoBehaviour
         get => FaceUp.activeSelf;
         private set
         {
-            Debug.Log($"[{ItemName}] Facing Up set to {value}");
+            Debug.Log($"[{Name}] Facing Up set to {value}");
             FaceUp.SetActive(value);
             FaceDown.SetActive(!value);
             if (!value && DraggedCard != this)
@@ -132,14 +131,18 @@ public class ActionCard : MonoBehaviour
         cardId = -1;
     }
 
+    ActionCardSetting settings;
+
     public void Configure(int cardId, ActionCardSetting settings, List<int> dice)
     {
+        this.settings = settings;
         this.cardId = cardId;
 
         TitleUI.text = settings.Name;
 
         ImageUI.sprite = settings.Sprite;
         ImageUI.color = settings.Sprite == null ? Color.black : Color.white;
+        
 
         actionType = settings.ActionType;
         if (actionType != ActionType.Attack)
@@ -189,7 +192,15 @@ public class ActionCard : MonoBehaviour
     }
 
     private IEnumerable<DieDropZone> VisibleZones => dropZones.Where(dz => dz.gameObject.activeSelf);
+
+    public string Name => settings?.Name ?? "--Unknown Card--";
+    public string Notation => settings.Notation;
+
+    #region Values
     public int Value => VisibleZones.Sum(dz => dz.Value);
+    public int HighestPossibleValue => VisibleZones.Sum(z => z.DieEffect == DieEffect.Subtract ? -1 : 6);
+    public string ValueRange => $"{Value} - {HighestPossibleValue}";
+    #endregion
 
     public int OpenSlots => VisibleZones.Count(dz => dz.CanTakeDie);
 
@@ -306,7 +317,7 @@ public class ActionCard : MonoBehaviour
         DraggedCard = null;
         HideOutline();
 
-        Debug.Log($"[{TitleUI.text}] Hover end");
+        Debug.Log($"[{Name}] Hover end");
         OnStatus?.Invoke(this, ActionCardStatus.DragEnd);
 
         if (Interactable && actionType == ActionType.Attack && Monster.HoveredMonster != null)
@@ -323,15 +334,14 @@ public class ActionCard : MonoBehaviour
             target.Health -= damage;
         }
 
-        Debug.Log($"[{TitleUI.text}] Invoking attack on <{target.Name}>");
+        Debug.Log($"[{Name}] Invoking attack on <{target.Name}>");
         OnAction?.Invoke(this, target, damage);
 
         FaceDownReason.text = UsedReason;
         FacingUp = false;
     }
 
-    public void OnClick()
-    {
+    public void Use() { 
         if (!Interactable) return;
 
         var monster = MonsterManager.instance.FirstAffectableMonster(this);
