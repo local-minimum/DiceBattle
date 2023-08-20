@@ -7,24 +7,30 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class Wall : MonoBehaviour
 {
-    [SerializeField, Range(1, 20)]
+    [SerializeField]
+    [OnChangedCall("UpdateMesh")]
     float height = 5f;
 
-    [SerializeField, Range(0, 10)]
+    [SerializeField]
+    [OnChangedCall("UpdateMesh")]
     float baseWidth = 0.5f;
 
-    [SerializeField, Range(0, 10)]
+    [SerializeField]
+    [OnChangedCall("UpdateMesh")]
     float topWidth = 0.3f;
 
     [SerializeField]
+    [OnChangedCall("UpdateMesh")]
     bool connectEndWithStart;
 
     [SerializeField]
+    [OnChangedCall("UpdateMesh")]
     List<Vector3> anchors = new List<Vector3>();
 
     [SerializeField, HideInInspector]
     Mesh mesh;
 
+    /*
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.magenta;
@@ -32,9 +38,8 @@ public class Wall : MonoBehaviour
         {
             Gizmos.DrawWireSphere(anchors[i], 1f);
         }
-
-        UpdateMesh();
     }
+    */
 
     struct MeshSegment {
         public Vector3[] Verts;
@@ -236,7 +241,7 @@ public class Wall : MonoBehaviour
     } 
 
 
-    void UpdateMesh()
+    public void UpdateMesh()
     {
         if (mesh == null)
         {
