@@ -22,14 +22,15 @@ public class Wall : MonoBehaviour
     [SerializeField]
     List<Vector3> anchors = new List<Vector3>();
 
+    [SerializeField, HideInInspector]
     Mesh mesh;
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.white;
+        Gizmos.color = Color.magenta;
         for (int i = 0, l = anchors.Count; i<l; i++)
         {
-            Gizmos.DrawWireSphere(anchors[i], 0.5f);
+            Gizmos.DrawWireSphere(anchors[i], 1f);
         }
 
         UpdateMesh();
@@ -54,23 +55,6 @@ public class Wall : MonoBehaviour
         var alpha = Vector3.Angle(midUnitVec, inVec) * Mathf.Deg2Rad;
         if (alpha < 0.05) return midPoint;
         return midUnitVec * inVec.magnitude / Mathf.Abs(Mathf.Cos(alpha)) + origo;
-    }
-
-    Vector3 InterpolateCorner(Vector3 origo, Vector3 inPos, Vector3 outPos, Vector3 inAxis)
-    {
-        return InterpolateCorner(origo, inPos, outPos);
-
-        var planarInAxis = new Vector3(inAxis.x, 0, inAxis.z);
-
-        // var ray = new Ray(inPos, planarInAxis * Mathf.Sign(Vector3.Project(outPos - inPos, planarInAxis).magnitude));
-        var ray = new Ray(inPos, inAxis);
-        var plane = new Plane(outPos - origo, outPos);
-        if (plane.Raycast(ray, out float enter))
-        {
-            Debug.Log("Ray position");
-            return ray.GetPoint(enter);
-        }
-        return Vector3.Lerp(inPos, outPos, 0.5f);
     }
 
     (Vector3, Vector3, Vector3, Vector3, Vector3, Vector3, Vector3, Vector3) SegmentVerts(
@@ -110,7 +94,7 @@ public class Wall : MonoBehaviour
             var nextAxis = (next - end).normalized;
 
             var isStartCap = i == 0 && !connectEndWithStart;
-            var isEndCap = i == lastIndex && !connectEndWithStart;
+            var isEndCap = i == lastIndex - 1 && !connectEndWithStart;
 
             var prevRight = Vector3.Cross(prevAxis, Vector3.up);
             var right = Vector3.Cross(axis, Vector3.up);
@@ -145,6 +129,14 @@ public class Wall : MonoBehaviour
                 endLeftUpper
                 ) = SegmentVerts(start, end, right, heightOffset);
 
+            /*
+            Gizmos.color = Color.green;
+            Gizmos.DrawCube(endRightLower, Vector3.one * 0.1f);
+            Gizmos.DrawCube(endRightUpper, Vector3.one * 0.1f);
+            Gizmos.DrawCube(endLeftLower, Vector3.one * 0.1f);
+            Gizmos.DrawCube(endLeftUpper, Vector3.one * 0.1f);
+            */
+
             var (
                 nextStartRightLower, 
                 nextStartRightUpper, 
@@ -164,21 +156,40 @@ public class Wall : MonoBehaviour
             Gizmos.DrawCube(nextStartLeftUpper, Vector3.one * 0.1f);
             */
 
-            var iStartRightUpper = isStartCap ? startRightUpper : InterpolateCorner(start + heightOffset, prevEndRightUpper, startRightUpper, prevAxis);
-            var iEndRightUpper = isEndCap ? endRightUpper : InterpolateCorner(end + heightOffset, endRightUpper, nextStartRightUpper, prevAxis);
-            var iStartLeftUpper = isStartCap ? startLeftUpper : InterpolateCorner(start + heightOffset, prevEndLeftUpper, startLeftUpper, prevAxis);
-            var iEndLeftUpper = isEndCap ? endLeftUpper : InterpolateCorner(end + heightOffset, endLeftUpper, nextStartLeftUpper, prevAxis);
+            var iStartRightUpper = isStartCap ? startRightUpper : InterpolateCorner(start + heightOffset, prevEndRightUpper, startRightUpper);
+            var iEndRightUpper = isEndCap ? endRightUpper : InterpolateCorner(end + heightOffset, endRightUpper, nextStartRightUpper);
+            var iStartLeftUpper = isStartCap ? startLeftUpper : InterpolateCorner(start + heightOffset, prevEndLeftUpper, startLeftUpper);
+            var iEndLeftUpper = isEndCap ? endLeftUpper : InterpolateCorner(end + heightOffset, endLeftUpper, nextStartLeftUpper);
+
+            if (isStartCap)
+            {
+                yield return new MeshSegment(
+                    new Vector3[] { 
+                        startLeftLower, 
+                        startLeftUpper, 
+                        startRightUpper, 
+                        startRightLower 
+                    },
+                    new int[]
+                    {
+                        triStart + 0, triStart + 2, triStart + 1,
+                        triStart + 0, triStart + 3, triStart + 2,
+                    }
+                );
+                triStart += 4;
+            }
+
             yield return new MeshSegment(
                 new Vector3[]
                 {
-                    isStartCap ? startRightLower : InterpolateCorner(start, prevEndRightLower, startRightLower, prevAxis), // +0
+                    isStartCap ? startRightLower : InterpolateCorner(start, prevEndRightLower, startRightLower), // +0
                     iStartRightUpper,
-                    isEndCap ? endRightLower : InterpolateCorner(end, endRightLower, nextStartRightLower, prevAxis),
+                    isEndCap ? endRightLower : InterpolateCorner(end, endRightLower, nextStartRightLower),
                     iEndRightUpper,
 
-                    isStartCap ? startLeftLower : InterpolateCorner(start, prevEndLeftLower, startLeftLower, prevAxis), // +4
+                    isStartCap ? startLeftLower : InterpolateCorner(start, prevEndLeftLower, startLeftLower), // +4
                     iStartLeftUpper,
-                    isEndCap ? endLeftLower : InterpolateCorner(end, endLeftLower, nextStartLeftLower, prevAxis),
+                    isEndCap ? endLeftLower : InterpolateCorner(end, endLeftLower, nextStartLeftLower),
                     iEndLeftUpper,
 
                     iStartRightUpper, // +8
@@ -200,6 +211,27 @@ public class Wall : MonoBehaviour
             );
 
             triStart += 12;
+
+            if (isEndCap)
+            {
+                yield return new MeshSegment(
+                    new Vector3[]
+                    {
+                        endRightLower,
+                        endRightUpper,
+                        endLeftUpper,
+                        endLeftLower,
+                    },
+                    new int[]
+                    {
+                        triStart + 0, triStart + 2, triStart + 1,
+                        triStart + 0, triStart + 3, triStart + 2,
+                    }
+                );
+
+                triStart += 4;
+            }
+
         }
     } 
 
