@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 196877101}
   - component: {fileID: 196877103}
   - component: {fileID: 196877102}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -361,7 +361,8 @@ GameObject:
   - component: {fileID: 1054560708}
   - component: {fileID: 1054560707}
   - component: {fileID: 1054560706}
-  m_Layer: 0
+  - component: {fileID: 1054560709}
+  m_Layer: 6
   m_Name: Outer Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -460,6 +461,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &1054560709
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054560704}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 1861796003}
 --- !u!1 &1242317359
 GameObject:
   m_ObjectHideFlags: 0
@@ -506,8 +521,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7794d285c29fcd040b57ae6094cec3b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  traversibilityMask:
+    serializedVersion: 2
+    m_Bits: 192
+  playerHeight: 1.7
   snap: 0
   actionSamplingFrequency: 0.4
+  horizontalRays: 15
+  rayOvershootNeeded: 0.5
+  neededRaysToPass: 7
 --- !u!114 &1242317362
 MonoBehaviour:
   m_ObjectHideFlags: 0

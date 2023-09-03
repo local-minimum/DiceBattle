@@ -17,4 +17,5 @@ public static class GameSettings
 
     public static int MaxShowWares = 5;
 
+    public static IGrid Grid { get; set; }
 }

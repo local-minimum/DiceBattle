@@ -8,6 +8,12 @@ public enum MoveAction { None, Forward, Left, Right, Back, RotateClockWise, Rota
 
 public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerController>
 {
+    [SerializeField]
+    LayerMask traversibilityMask;
+
+    [SerializeField, Range(0, 3)]
+    float playerHeight = 1.7f;
+
     [SerializeField, WithAction("SnapToFloorGrid", "Snap", "Snap position to ground")]
     bool snap;
 
@@ -49,7 +55,7 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
     }
     public void SnapToFloorGrid()
     {
-        transform.position = DynamicGrid.SnapGridGroundCenter(transform.position);
+        transform.position = GameSettings.Grid.GridGroundCenter(transform.position);
     }
 
     MoveAction _moveAction = MoveAction.None;
@@ -128,9 +134,12 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
             case MoveAction.Right:
             case MoveAction.Back:
             case MoveAction.Forward:
-                // TODO: Decouple from grid
-                transform.position += Scale(Direction.AsVector(action), DynamicGrid.GridSize);
-                SnapToFloorGrid();
+                var direction = Direction.ByMovement(action);
+                if (CanMove(direction))
+                {
+                    transform.position += Scale(direction.AsVector(), GameSettings.Grid.GridSize);
+                    SnapToFloorGrid();
+                }
                 break;
             case MoveAction.RotateClockWise:
                 Direction = Direction.RotateCW();
@@ -150,6 +159,100 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
     void WaitForNextTick()
     {
         nextAction = Time.timeSinceLevelLoad + actionSamplingFrequency;
+    }
+
+    [SerializeField, Range(4, 20)]
+    int horizontalRays = 12;
+
+    [SerializeField, Range(0, 1)]
+    float rayOvershootNeeded = 0.5f;
+
+    [SerializeField, Range(1, 10)]
+    int neededRaysToPass = 7;
+
+
+    IEnumerable<Ray> TestTraversibilityRays(CardinalDirection direction)
+    {
+        var directionVector = direction.AsVector();
+        var feet = transform.position - Vector3.up * GameSettings.Grid.HalfHeight;
+        var head = feet + Vector3.up * playerHeight;
+
+        for (int i = 0; i<horizontalRays; i++)
+        {
+            yield return new Ray(Vector3.Lerp(feet, head, i / (float)horizontalRays), directionVector);
+        }
+    }
+
+    IEnumerable<Ray> TestTraversibilityRays(Vector3 directionVector)
+    {
+        var feet = transform.position - Vector3.up * GameSettings.Grid.HalfHeight;
+        var head = feet + Vector3.up * playerHeight;
+
+        for (int i = 0; i<horizontalRays; i++)
+        {
+            yield return new Ray(Vector3.Lerp(feet, head, i / (float)horizontalRays), directionVector);
+        }
+    }
+
+    private struct TraversibilityInfo
+    {
+        public readonly bool Passable;
+        public readonly Vector3 RayOrigin;
+        public readonly Vector3 RayTerminus;
+
+        public TraversibilityInfo(bool passable, Vector3 rayOrigin, Vector3 rayTerminus)
+        {
+            Passable = passable;
+            RayOrigin = rayOrigin;
+            RayTerminus = rayTerminus;
+        }
+    }
+
+    IEnumerable<TraversibilityInfo> TestTraversibility(CardinalDirection direction)
+    {
+        var directionVector = direction.AsVector();
+        var gridSizeAlongDirection = Vector3.Project(GameSettings.Grid.GridSize, directionVector).magnitude;
+        var targetGridCenter = GameSettings.Grid.GridCenter(transform.position + directionVector * gridSizeAlongDirection, out var height);
+        
+        // GameSettings.Game.GridSize;
+        foreach (var ray in TestTraversibilityRays(targetGridCenter - transform.position))
+        {
+            if (Physics.Raycast(ray, out RaycastHit hit, gridSizeAlongDirection + rayOvershootNeeded, traversibilityMask))
+            {
+                yield return new TraversibilityInfo(false, ray.origin, hit.point);
+            } else
+            {
+                yield return new TraversibilityInfo(true, ray.origin, ray.GetPoint(gridSizeAlongDirection));
+            }
+        }
+    }
+
+    public bool CanMove(CardinalDirection direction)
+    {
+        int passers = 0;
+        foreach (var info in TestTraversibility(direction))
+        {
+            if (info.Passable)
+            {
+                passers += 1;
+                if (passers >= neededRaysToPass) return true;
+            } else
+            {
+                passers = 0;
+            }
+        }
+        return false;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (Direction == CardinalDirection.None) return;
+
+        foreach (var info in TestTraversibility(Direction))
+        {
+            Gizmos.color = info.Passable ? Color.green : Color.red;
+            Gizmos.DrawLine(info.RayOrigin, info.RayTerminus);
+        }
     }
 
     private void Update()

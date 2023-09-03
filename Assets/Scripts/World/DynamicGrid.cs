@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DynamicGrid : DeCrawl.Primitives.FindingSingleton<DynamicGrid>
+public class DynamicGrid : DeCrawl.Primitives.FindingSingleton<DynamicGrid>, IGrid
 {
     [SerializeField]
     Vector3 gridSize = Vector3.one * 3;
@@ -13,14 +13,12 @@ public class DynamicGrid : DeCrawl.Primitives.FindingSingleton<DynamicGrid>
     [SerializeField]
     Vector3 gridOrigin = Vector3.zero;
 
-    public static Vector3 GridSize => instance.gridSize;
-    public static Vector3 HalfSize => instance.gridSize * 0.5f;
+    #region IGrid
+    public Vector3 GridSize => gridSize;
+    public Vector3 HalfSize => gridSize * 0.5f;
+    public float HalfHeight => gridSize.y * 0.5f;
 
-    public static float HalfHeight => instance.gridSize.y * 0.5f;
-
-    public static Vector3 GetXZOffset(int x, int z) => new Vector3(instance.gridSize.x * x, 0, instance.gridSize.z * z);
-
-    public static Vector3 SnapGridCenter(Vector3 worldPosition, out int height)
+    public Vector3 GridCenter(Vector3 worldPosition, out int height)
     {
         var origin = instance.gridOrigin;
         var offset = (worldPosition - origin);
@@ -38,11 +36,14 @@ public class DynamicGrid : DeCrawl.Primitives.FindingSingleton<DynamicGrid>
         ) + HalfSize;
     }
 
-    public static Vector3 SnapGridGroundCenter(Vector3 worldPosition)
+    public Vector3 GridGroundCenter(Vector3 worldPosition)
     {
-        var pos = SnapGridCenter(worldPosition, out int height);
+        var pos = GridCenter(worldPosition, out int height);
         return pos + new Vector3(0, -height * instance.gridSize.y);
     }
+    #endregion
+
+    Vector3 GetXZOffset(int x, int z) => new Vector3(GridSize.x * x, 0, GridSize.z * z);
 
 #if UNITY_EDITOR
 
@@ -70,9 +71,10 @@ public class DynamicGrid : DeCrawl.Primitives.FindingSingleton<DynamicGrid>
     private void OnDrawGizmosSelected()
     {
         if (trackedObject == null) return;
+        GameSettings.Grid = this;
 
         int height;
-        var refPoint = SnapGridCenter(trackedObject.position, out height);
+        var refPoint = GridCenter(trackedObject.position, out height);
         var upOne = new Vector3(0, gridSize.y);
 
         var floorSize = new Vector3(gridSize.x, groundThickness, gridSize.z);
@@ -81,7 +83,7 @@ public class DynamicGrid : DeCrawl.Primitives.FindingSingleton<DynamicGrid>
         {
             for (int dz = -griddedPlanarOffset; dz <= griddedPlanarOffset; dz++)
             {
-                var pt = SnapGridCenter(refPoint + GetXZOffset(dx, dz), out height);
+                var pt = GridCenter(refPoint + GetXZOffset(dx, dz), out height);
 
                 for (int dy = -griddedVerticalOffset; dy <= griddedVerticalOffset; dy++)
                 {
@@ -114,4 +116,9 @@ public class DynamicGrid : DeCrawl.Primitives.FindingSingleton<DynamicGrid>
 
     }
 #endif
+
+    private void Start()
+    {
+        GameSettings.Grid = this;
+    }
 }

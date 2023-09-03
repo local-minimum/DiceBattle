@@ -5,19 +5,33 @@ using UnityEngine;
 public enum CardinalDirection { None, North, West, South, East }
 public static class DirectionExtensions
 {
+    public static CardinalDirection ByMovement(this CardinalDirection faceDirection, MoveAction moveAction)
+    {
+        switch (moveAction)
+        {
+            case MoveAction.Forward:
+                return faceDirection;
+            case MoveAction.Back:
+                return faceDirection.Invert();
+            case MoveAction.Left:
+                return faceDirection.RotateCCW();
+            case MoveAction.Right:
+                return faceDirection.RotateCW();
+            default:
+                return CardinalDirection.None;
+        }
+    }
+
     public static Vector3 AsVector(this CardinalDirection faceDirection, MoveAction moveAction)
     {
         switch (moveAction)
         {
 
             case MoveAction.Forward: 
-                return faceDirection.AsVector();
             case MoveAction.Back: 
-                return faceDirection.Invert().AsVector();
             case MoveAction.Left:
-                return faceDirection.RotateCCW().AsVector();
             case MoveAction.Right:
-                return faceDirection.RotateCW().AsVector();
+                return faceDirection.ByMovement(moveAction).AsVector();
         }
         return Vector3.zero;
 
