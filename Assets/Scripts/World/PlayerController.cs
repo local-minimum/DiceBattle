@@ -170,12 +170,29 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
     [SerializeField, Range(1, 10)]
     int neededRaysToPass = 7;
 
+    [SerializeField, Range(0, 90)]
+    float maxWalkInclination = 45f;
+
+    [SerializeField, Range(0, 90)]
+    float minClimbInclination = 80f;
+
+    [SerializeField]
+    float maxClimbHeight = 1f;
+
+    [SerializeField, Range(-90, 0)]
+    float maxJumpInclination = -75f;
+
+    [SerializeField]
+    float maxJumpHeight = 5f;
+
+    Vector3 Feet => transform.position - Vector3.up * GameSettings.Grid.HalfHeight;
+    Vector3 Head => Feet + Vector3.up * playerHeight;
 
     IEnumerable<Ray> TestTraversibilityRays(CardinalDirection direction)
     {
         var directionVector = direction.AsVector();
-        var feet = transform.position - Vector3.up * GameSettings.Grid.HalfHeight;
-        var head = feet + Vector3.up * playerHeight;
+        var feet = Feet;
+        var head = Head;
 
         for (int i = 0; i<horizontalRays; i++)
         {
@@ -185,8 +202,8 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
 
     IEnumerable<Ray> TestTraversibilityRays(Vector3 directionVector)
     {
-        var feet = transform.position - Vector3.up * GameSettings.Grid.HalfHeight;
-        var head = feet + Vector3.up * playerHeight;
+        var feet = Feet;
+        var head = Head;
 
         for (int i = 0; i<horizontalRays; i++)
         {
@@ -199,12 +216,14 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
         public readonly bool Passable;
         public readonly Vector3 RayOrigin;
         public readonly Vector3 RayTerminus;
+        public readonly float Distance;
 
-        public TraversibilityInfo(bool passable, Vector3 rayOrigin, Vector3 rayTerminus)
+        public TraversibilityInfo(bool passable, Vector3 rayOrigin, Vector3 rayTerminus, float distance)
         {
             Passable = passable;
             RayOrigin = rayOrigin;
             RayTerminus = rayTerminus;
+            Distance = distance;
         }
     }
 
@@ -213,16 +232,16 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
         var directionVector = direction.AsVector();
         var gridSizeAlongDirection = Vector3.Project(GameSettings.Grid.GridSize, directionVector).magnitude;
         var targetGridCenter = GameSettings.Grid.GridCenter(transform.position + directionVector * gridSizeAlongDirection, out var height);
-        
-        // GameSettings.Game.GridSize;
+
+        var fullDistance = gridSizeAlongDirection + rayOvershootNeeded;
         foreach (var ray in TestTraversibilityRays(targetGridCenter - transform.position))
         {
-            if (Physics.Raycast(ray, out RaycastHit hit, gridSizeAlongDirection + rayOvershootNeeded, traversibilityMask))
+            if (Physics.Raycast(ray, out RaycastHit hit, fullDistance, traversibilityMask))
             {
-                yield return new TraversibilityInfo(false, ray.origin, hit.point);
+                yield return new TraversibilityInfo(false, ray.origin, hit.point, hit.distance);
             } else
             {
-                yield return new TraversibilityInfo(true, ray.origin, ray.GetPoint(gridSizeAlongDirection));
+                yield return new TraversibilityInfo(true, ray.origin, ray.GetPoint(gridSizeAlongDirection), fullDistance);
             }
         }
     }
@@ -230,8 +249,37 @@ public class PlayerController : DeCrawl.Primitives.FindingSingleton<PlayerContro
     public bool CanMove(CardinalDirection direction)
     {
         int passers = 0;
+        var currentDistance = 0;
+        var infos = new List<TraversibilityInfo>();
+        infos.Add(new TraversibilityInfo(true, Feet, Feet, 0));
+
         foreach (var info in TestTraversibility(direction))
         {
+            // TODO: Should interpolate down on previous vector and update it
+            // to make vertical step.
+            if (info.Distance < currentDistance)
+            {
+                int infoCount = infos.Count;
+                int truncateStart = infoCount - 1;
+                while (truncateStart > 1)
+                {
+                    if (infos[truncateStart].Distance <= info.Distance)
+                    {
+                        truncateStart++;
+                        break;
+                    }
+                    truncateStart--;
+                }
+                infos.RemoveRange(truncateStart, infoCount - truncateStart);
+            }
+
+            // TODO: After vertical step really need to realign and do new traveseribility test with
+            // new ray based on current elevation
+
+            // TODO: Should compare check walks, jumps and falls against heights and inclinations
+            var segmentVector = info.RayTerminus - infos[infos.Count - 1].RayTerminus;
+            var inclination = segmentVector.Inclination() * Mathf.Rad2Deg;
+            Debug.Log(inclination);
             if (info.Passable)
             {
                 passers += 1;
